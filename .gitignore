@@ -1,0 +1,21 @@
+# The trained model now lives on Hugging Face Hub and is downloaded
+# automatically at runtime (see pipeline.py) -- it's too large for GitHub
+# and doesn't need to be committed here at all.
+models/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# OS-specific junk
+.DS_Store
+Thumbs.db
+
+# Local scratch/test output -- not part of the actual app
+*_test_results.txt

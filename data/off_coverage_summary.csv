@@ -1,0 +1,9 @@
+metric,value
+labels_analysed,60
+ingredients_extracted,853
+coverage_percent,65.18
+status_halal,493
+status_syubhah,360
+resolved_by_rules,496
+resolved_by_ner,350
+resolved_by_ner_no_span,7
