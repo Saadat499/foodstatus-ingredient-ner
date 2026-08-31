@@ -31,6 +31,21 @@ SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SRC_DIR)  # one level up from src/
 PIPELINE_SCRIPT = os.path.join("src", "pipeline.py")  # path AS SEEN from PROJECT_ROOT
 
+# Where to load the NER model from: a local folder for local development,
+# or a Hugging Face repo ID when deployed (where the local model folder
+# doesn't exist at all -- it's excluded from git via .gitignore).
+#
+# Deliberately reading this directly via st.secrets and passing it as an
+# explicit --model_dir CLI argument below, rather than relying on
+# Streamlit Cloud's secrets-to-environment-variable propagation reaching
+# a separate subprocess -- that mechanism has a documented history of
+# inconsistency (see e.g. streamlit/streamlit#4123), and this makes the
+# actual value used fully explicit and controlled by this code instead.
+try:
+    MODEL_DIR = st.secrets.get("MODEL_DIR", "models/bert-ner")
+except Exception:
+    MODEL_DIR = "models/bert-ner"
+
 # Only needed on Windows, where Tesseract isn't on PATH on this machine.
 # Harmless elsewhere -- pytesseract just uses PATH if this file doesn't exist.
 _WINDOWS_TESSERACT = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -58,7 +73,7 @@ def run_classifier(cleaned_text: str) -> tuple[str, str]:
     model-loading progress bar), so its mere presence isn't a failure signal.
     """
     result = subprocess.run(
-        [sys.executable, PIPELINE_SCRIPT, "--text", cleaned_text],
+        [sys.executable, PIPELINE_SCRIPT, "--text", cleaned_text, "--model_dir", MODEL_DIR],
         cwd=PROJECT_ROOT,
         capture_output=True,
         text=True,
