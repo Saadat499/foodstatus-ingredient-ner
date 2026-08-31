@@ -1,10 +1,10 @@
-# HalalGuard-NLP
+# ScanHalal
 
 Point a camera at an ingredient label and get a halal / haram / syubhah
 verdict, backed by a fine-tuned NER model and a rule-based classifier
 grounded in JAKIM's halal certification framework.
 
-**Live demo:** _add your Streamlit Cloud link here once deployed_
+**Live demo:** https://foodstatus-ingredient-ner-jiqrb4emmsyjcvs6x95xvx.streamlit.app
 
 > **Disclaimer:** This is a personal/academic portfolio project, not an
 > official halal certification tool. It should not be relied on as a
@@ -15,14 +15,19 @@ grounded in JAKIM's halal certification framework.
 
 ## What it does
 
-1. Upload a photo of an ingredient label (or use your camera)
-2. A photo-quality check rejects blurry or too-small-text photos before
-   wasting time on OCR
-3. Tesseract OCR reads the raw text off the photo
-4. A custom cleanup layer fixes common OCR noise (misread characters,
-   dropped commas, boilerplate text mixed in with ingredients) while
-   explicitly avoiding overcorrection -- it will not silently guess an
-   ingredient into existence
+1. Scan or upload a photo of an ingredient label
+2. A photo-quality check rejects blurry photos or ones where the text is
+   too small to read reliably, *before* wasting time on OCR
+3. Tesseract OCR reads the raw text off the photo -- automatically
+   comparing multiple candidate orientations (in case the photo was
+   captured sideways or upside down) and keeping whichever produces the
+   highest real OCR confidence, rather than trusting a single guess
+4. A cleanup layer strips packaging boilerplate (nutrition tables,
+   addresses, "best before" dates) and corrects OCR noise -- but only
+   when a token matches a known ingredient *exactly* after undoing a
+   small set of well-documented OCR character confusions (0/o, 1/l,
+   8/b, etc.). It does not guess at "close enough" matches; see
+   *Engineering notes* below for why
 5. A fine-tuned BERT NER model and a rule-based classifier work together
    to identify each ingredient and classify it as halal, haram, or
    syubhah (doubtful/needs review), following JAKIM's dairy-source
@@ -31,6 +36,12 @@ grounded in JAKIM's halal certification framework.
 6. The most severe verdict across all ingredients determines the overall
    product verdict (a conservative, "when in doubt, don't assume safe"
    aggregation)
+7. Results are shown as a clear pass/fail-style verdict with a
+   plain-language reason for each ingredient -- full jurisprudential
+   detail (evidence tier, source citation) is available per ingredient
+   on request, not hidden, just not shown by default. If an ingredient
+   couldn't be read clearly, the app says so directly and suggests a
+   clearer retake, rather than silently guessing at what it might say
 
 ## Tech stack
 
@@ -42,43 +53,52 @@ grounded in JAKIM's halal certification framework.
   reference table (T1-T4 evidence provenance) plus an E-number lookup
   table
 - **Interface:** Streamlit
-- **Spell correction:** `pyspellchecker`, with a British-spelling
-  supplement (JAKIM-region labels commonly use British spelling)
 
-## A few technical challenges worth mentioning
+## Engineering notes: why OCR correction is exact-match only
 
-This project went through substantial real-world testing against actual
-photographed labels, not just clean/synthetic text, which surfaced (and
-fixed) several non-obvious bugs:
+An earlier version of the correction layer used fuzzy string matching to
+recover more OCR typos automatically. Testing against real photographed
+labels (not just synthetic test text) found real problems with that
+approach, including one genuinely serious case: a garbled fragment of
+unrelated manufacturer boilerplate ("ARED", from a mangled "PREPARED BY"
+label) fuzzy-matched into the scripturally haram term "LARD," producing
+a false HARAM verdict for text that was never an ingredient at all.
 
-- **Compounded OCR guesses**: an early version of the correction layer
-  could confidently "fix" a garbled word into the *wrong* real word by
-  chaining two uncertain guesses together. Fixed by requiring a much
-  higher confidence bar for any correction built on an unconfirmed guess.
-- **E-number ambiguity**: short alphanumeric codes (E-numbers) are too
-  easy to fuzzy-match into a *different*, wrong additive when garbled.
-  The system now refuses to guess at these and leaves them for manual
-  review rather than risk a confident wrong answer.
-- **Real-word protection**: correctly-spelled English words that simply
-  aren't in the ingredient vocabulary (e.g. "flavour") were being
-  mistaken for typos of unrelated vocabulary words. Fixed with an
-  explicit dictionary check -- a word that isn't broken shouldn't be
-  "corrected."
-- **Photo quality gating**: blur and text-size are measured and checked
-  *before* OCR runs, calibrated against real photos rather than assumed
-  thresholds.
+Auditing every correction made during testing against *real* photos
+(rather than hand-typed test strings) also showed the fuzzy version's
+real-world benefit was much smaller than it first appeared: across every
+real photo tested, fuzzy matching produced exactly one correct fix and
+one dangerous one.
+
+Given that a false HARAM claim is about the most consequential mistake
+this system could make, and the measured real-world benefit of fuzzy
+matching was marginal, the correction layer was deliberately simplified
+to exact-match only: a token is corrected if and only if it matches a
+known ingredient term precisely, after undoing a specific, well-known set
+of OCR character confusions. This structurally cannot reproduce the
+false-HARAM failure mode. The trade-off is real: ingredients with OCR
+noise that isn't an exact-match case now surface as "unrecognized,
+needs review" instead of being auto-corrected -- which is the same
+conservative default the classifier itself already uses whenever it
+lacks a certifier ruling.
 
 ## Known limitations
 
-- OCR occasionally drops words entirely (not just garbles them) on
-  low-quality photos -- this is a fundamental OCR/image-quality
-  limitation, not something a text-correction layer can fix
-- Some ingredients (e.g. gelatin, vanilla) aren't in the current
-  reference table and will be flagged as unrecognized rather than
-  classified -- flagged as "needs review," not silently misclassified
-- Complex label layouts (nutrition table and ingredients panel side by
-  side) can still leak some cross-contamination noise into the parsed
-  ingredient text
+- OCR occasionally drops or interleaves words entirely on complex label
+  layouts (e.g. a nutrition table or storage-instructions box positioned
+  next to the ingredients text) -- a structural OCR/layout limitation,
+  not something a text-correction layer can fix
+- Word-level correction is intentionally conservative (exact match only,
+  see above) -- ingredients with OCR noise beyond a known character
+  confusion will show as "unrecognized" rather than being auto-corrected
+- Some ingredients (e.g. gelatin, vanilla, hazelnuts) aren't in the
+  current reference table and will be flagged as unrecognized rather
+  than classified -- surfaced as "needs review," never silently
+  misclassified
+- Orientation handling compares OCR confidence across candidate
+  rotations rather than trusting a single detector, specifically because
+  Tesseract's orientation detector was found to behave inconsistently
+  across platforms during testing
 
 ## Running locally
 
@@ -101,8 +121,8 @@ streamlit run src/app.py
 ## Project background
 
 Originally developed as a conference paper (targeting PROCS_ICMLDE
-format), combining NLP-based ingredient classification with a
-jurisprudentially-grounded rule engine. This repository extends that
-work into a computer-vision-enabled personal portfolio project, adding
-real-time photo capture, OCR robustness engineering, and a deployable
-web interface.
+format, under the name HalalGuard-NLP), combining NLP-based ingredient
+classification with a jurisprudentially-grounded rule engine. This
+repository extends that work into ScanHalal: a computer-vision-enabled
+personal portfolio project, adding real-time photo capture, OCR
+robustness engineering, and a deployable web interface.

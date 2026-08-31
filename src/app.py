@@ -1,5 +1,5 @@
 """
-HalalGuard-NLP -- static-photo demo.
+ScanHalal -- static-photo demo.
 
 Upload a photo of an ingredient label -> OCR reads it -> ocr_bridge.py
 cleans it up -> your real classifier pipeline gives a verdict. This is the
@@ -15,6 +15,7 @@ cwd-dependent-path bug we already found and fixed in ocr_bridge.py would
 otherwise resurface here too.
 """
 
+import html as html_lib
 import json
 import os
 import subprocess
@@ -208,9 +209,160 @@ def process_photo(image: Image.Image) -> dict:
 
 # --- Streamlit UI ---
 
-st.set_page_config(page_title="HalalGuard-NLP", page_icon="\U0001F50E")
-st.title("HalalGuard-NLP")
-st.caption("Scan or upload a photo of an ingredient label to get a halal/haram/syubhah verdict.")
+st.set_page_config(page_title="ScanHalal", page_icon="\U0001F50E", layout="centered")
+
+# Minimal, scoped CSS: one accent color for branding, three semantic
+# colors reserved ONLY for verdicts (not used decoratively elsewhere),
+# tighter spacing, and card-style ingredient rows instead of Streamlit's
+# default plain layout. No gradients, no extra fonts beyond one clean
+# sans-serif, no animation -- the goal is restrained, not flashy.
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body, [class*="css"] { font-family: 'Inter', -apple-system, sans-serif; }
+
+:root {
+    --accent: #1F2A44;
+    --accent-soft: #F4F6FA;
+    --halal: #1E8E5A;
+    --halal-bg: #EAF7F0;
+    --syubhah: #B7791F;
+    --syubhah-bg: #FDF6E9;
+    --haram: #C0392B;
+    --haram-bg: #FCEBEA;
+    --border: #E4E7EC;
+    --text-muted: #6B7280;
+}
+
+/* Tighten Streamlit's default top padding for a less "dashboard-y" feel */
+.block-container { padding-top: 2.5rem; padding-bottom: 3rem; max-width: 720px; }
+
+/* Hero header */
+.hg-header { margin-bottom: 0.25rem; }
+.hg-header h1 {
+    font-size: 1.85rem; font-weight: 700; color: var(--accent);
+    margin-bottom: 0.15rem; letter-spacing: -0.02em;
+}
+.hg-header p { color: var(--text-muted); font-size: 0.95rem; margin-top: 0; }
+
+/* Segmented-look radio for the camera/upload choice */
+div[role="radiogroup"] { gap: 0.5rem; }
+div[role="radiogroup"] label {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.35rem 0.9rem; background: white;
+}
+
+/* Verdict hero card -- replaces the default alert box */
+.hg-verdict {
+    border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1rem 0 1.25rem 0;
+    display: flex; align-items: center; gap: 0.75rem;
+}
+.hg-verdict .icon { font-size: 1.75rem; line-height: 1; }
+.hg-verdict .label { font-size: 1.2rem; font-weight: 700; }
+.hg-verdict.halal { background: var(--halal-bg); color: var(--halal); }
+.hg-verdict.syubhah { background: var(--syubhah-bg); color: var(--syubhah); }
+.hg-verdict.haram { background: var(--haram-bg); color: var(--haram); }
+
+.hg-flagged { color: var(--text-muted); font-size: 0.88rem; margin: -0.75rem 0 1.25rem 0; }
+
+/* Ingredient cards */
+.hg-ingredient {
+    border: 1px solid var(--border); border-left: 4px solid var(--border);
+    border-radius: 8px; padding: 0.7rem 1rem; margin-bottom: 0.55rem;
+    background: white;
+}
+.hg-ingredient.halal { border-left-color: var(--halal); }
+.hg-ingredient.syubhah { border-left-color: var(--syubhah); }
+.hg-ingredient.haram { border-left-color: var(--haram); }
+.hg-ingredient .row { display: flex; justify-content: space-between; align-items: center; }
+.hg-ingredient .name { font-weight: 600; color: var(--accent); }
+.hg-ingredient .status { font-size: 0.82rem; font-weight: 600; }
+.hg-ingredient .status.halal { color: var(--halal); }
+.hg-ingredient .status.syubhah { color: var(--syubhah); }
+.hg-ingredient .status.haram { color: var(--haram); }
+.hg-ingredient .summary { color: var(--text-muted); font-size: 0.86rem; margin-top: 0.25rem; }
+
+.hg-section-label {
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-muted); margin: 1.5rem 0 0.6rem 0;
+}
+
+/* Force a consistent, controlled light theme regardless of the user's
+   system/browser dark-mode setting -- confirmed via a real screenshot
+   that our color choices (tuned for a light background) were nearly
+   unreadable against Streamlit's dark theme. Rather than guess at
+   colors that work in both, control the background directly. */
+.stApp { background-color: #FFFFFF !important; }
+.stApp, .stApp p, .stApp span, .stApp label, .stApp div { color: #1F2A44; }
+
+/* Style the native "Detail" expander to match the custom cards --
+   targeting just the outer container and "summary" wasn't enough (a real
+   screenshot showed one expander still rendering a dark header bar even
+   though its content area was white), so this covers every element
+   Streamlit nests inside the component, not just the top level. */
+[data-testid="stExpander"],
+[data-testid="stExpander"] > details,
+[data-testid="stExpander"] summary,
+[data-testid="stExpander"] div {
+    background-color: white !important;
+    color: #1F2A44 !important;
+}
+[data-testid="stExpander"] {
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    margin-bottom: 0.75rem;
+}
+[data-testid="stExpander"] summary {
+    font-weight: 500;
+}
+[data-testid="stExpander"] summary svg { fill: #1F2A44 !important; }
+
+/* File uploader and camera input widgets -- confirmed by screenshot to
+   still render with a dark background even after the page-level fix,
+   since these are self-contained components with their own internal
+   styling that a general .stApp override doesn't reach. */
+[data-testid="stFileUploader"],
+[data-testid="stFileUploaderDropzone"],
+[data-testid="stCameraInput"] {
+    background-color: white !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+}
+[data-testid="stFileUploader"] *,
+[data-testid="stFileUploaderDropzone"] *,
+[data-testid="stCameraInput"] * {
+    color: #1F2A44 !important;
+}
+/* The row Streamlit shows for an already-uploaded file (name, size,
+   thumbnail) is a nested div with its own dark background that the
+   outer-container rule above didn't reach -- confirmed by a real
+   screenshot showing it still dark after that fix. Targeting every
+   nested div directly, rather than guessing at its exact internal
+   test-id, since Streamlit doesn't consistently expose one for this. */
+[data-testid="stFileUploader"] div,
+[data-testid="stFileUploaderDropzone"] div {
+    background-color: white !important;
+}
+/* The blanket rule above would also wash out the "Upload"/"Browse
+   files" button itself, which is meant to stay a solid accent color --
+   explicitly restore that after the blanket rule. */
+[data-testid="stFileUploader"] button,
+[data-testid="stFileUploaderDropzone"] button {
+    background-color: #1F2A44 !important;
+}
+[data-testid="stFileUploader"] button *,
+[data-testid="stFileUploaderDropzone"] button * {
+    color: white !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown(
+    '<div class="hg-header"><h1>ScanHalal</h1>'
+    '<p>Scan or upload a photo of an ingredient label to get a halal / haram / syubhah verdict.</p></div>',
+    unsafe_allow_html=True,
+)
 
 _STATUS_DISPLAY = {
     "halal": ("HALAL", "\u2705", "success"),
@@ -241,45 +393,58 @@ _TIER_SHORT_SUMMARY = {
 
 def render_verdict(report: dict) -> None:
     """
-    Friendly, non-technical display: a big colored banner for the overall
-    verdict, a one-line summary of which ingredient(s) drove it, a short
-    plain-language summary per ingredient where one is safely available,
-    and the full detailed reasoning behind a "Detail" toggle -- not hidden
-    as a technical afterthought, just collapsed, since some of these
-    explanations are long (Quranic citations, JAKIM references) and would
-    overwhelm a quick-glance view if all shown open at once.
+    Friendly, non-technical display: a big colored hero card for the
+    overall verdict, a one-line summary of which ingredient(s) drove it,
+    a short plain-language summary per ingredient where one is safely
+    available, and the full detailed reasoning behind a "Detail" toggle --
+    not hidden as a technical afterthought, just collapsed, since some of
+    these explanations are long (Quranic citations, JAKIM references) and
+    would overwhelm a quick-glance view if all shown open at once.
+
+    All ingredient text is HTML-escaped before insertion, since it comes
+    from OCR'd real-world photos, not a trusted fixed string -- a label
+    containing "<" or "&" shouldn't be able to break the page layout.
     """
     overall = report.get("overall", "syubhah")
-    label, icon, box_type = _STATUS_DISPLAY.get(overall, (overall.upper(), "", "warning"))
+    label, icon, _ = _STATUS_DISPLAY.get(overall, (overall.upper(), "", ""))
+    verdict_css = overall if overall in ("halal", "syubhah", "haram") else "syubhah"
     ingredients = report.get("ingredients", [])
 
-    box_fn = {"success": st.success, "warning": st.warning, "error": st.error}[box_type]
-    box_fn(f"{icon} **{label}**")
+    st.markdown(
+        f'<div class="hg-verdict {verdict_css}"><span class="icon">{icon}</span>'
+        f'<span class="label">{html_lib.escape(label)}</span></div>',
+        unsafe_allow_html=True,
+    )
 
     non_halal = [i for i in ingredients if i.get("status") != "halal"]
     if non_halal:
-        names = ", ".join(i.get("ingredient", "?") for i in non_halal)
-        st.caption(f"Flagged because of: {names}")
+        names = ", ".join(html_lib.escape(i.get("ingredient", "?")) for i in non_halal)
+        st.markdown(f'<div class="hg-flagged">Flagged because of: {names}</div>', unsafe_allow_html=True)
     elif ingredients:
-        st.caption("All recognized ingredients are halal.")
+        st.markdown('<div class="hg-flagged">All recognized ingredients are halal.</div>', unsafe_allow_html=True)
 
-    st.subheader("Ingredients")
+    st.markdown('<div class="hg-section-label">Ingredients</div>', unsafe_allow_html=True)
     for item in ingredients:
         name = item.get("ingredient", "?")
         qualifier = item.get("qualifier")
         display_name = f"{name} ({qualifier})" if qualifier else name
         status = item.get("status", "syubhah")
         status_word, item_icon, _ = _STATUS_DISPLAY.get(status, (status.upper(), "", ""))
-
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.write(f"{item_icon} **{display_name}**")
-        with col2:
-            st.write(status_word)
+        status_css = status if status in ("halal", "syubhah", "haram") else "syubhah"
 
         short = _TIER_SHORT_SUMMARY.get((item.get("evidence_tier"), status))
-        if short:
-            st.caption(short)
+        summary_html = (
+            f'<div class="summary">{html_lib.escape(short)}</div>' if short else ""
+        )
+
+        st.markdown(
+            f'<div class="hg-ingredient {status_css}">'
+            f'<div class="row"><span class="name">{item_icon} {html_lib.escape(display_name)}</span>'
+            f'<span class="status {status_css}">{html_lib.escape(status_word)}</span></div>'
+            f'{summary_html}'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
         reason = item.get("reason")
         if reason:
