@@ -12,9 +12,39 @@ still happens entirely in classifier.py.
         -> [1] structural cleanup   strip boilerplate, fix line wraps,
                                      balance dropped brackets
         -> [2] segment splitting    comma-split while respecting "(...)"
-        -> [3] vocabulary matching  fuzzy-correct each base ingredient name
-                                     against your existing reference terms
+        -> [3] vocabulary matching  correct each base ingredient name
+                                     against your existing reference terms,
+                                     EXACT MATCHES ONLY -- see below
         -> cleaned ingredient statement, ready for segmentation.py
+
+Word correction is intentionally EXACT-MATCH ONLY (a token, after
+undoing a small set of well-known OCR character confusions like 0/o or
+1/l, must land PRECISELY on a real vocabulary word). There is no fuzzy
+"closest match" step. This is a deliberate simplification after real
+testing showed the fuzzy version was a worse trade than it first looked:
+
+  - Every "legitimate correction" fuzzy matching was justified by came
+    from synthetic test strings typed by hand to look like plausible OCR
+    noise (e.g. "8ovine"), not from actual photographed labels.
+  - Audited against every REAL photo tested in development, fuzzy
+    matching produced exactly one correct fix ("carbonat"->"carbonate")
+    and one dangerous one (a mangled fragment of unrelated packaging
+    text, "ared", matched into the scripturally haram term "lard" --
+    producing a false HARAM verdict for text that was never an
+    ingredient).
+  - Real OCR failures on real photos were dominated by dropped words and
+    truncated fragments anyway, which no correction strategy (fuzzy or
+    exact) can safely reconstruct -- fuzzy matching's real benefit was
+    much smaller than it appeared from synthetic testing, while its
+    worst-case risk was a false religious/dietary claim.
+
+Given that trade, exact-only is simpler, fully auditable ("either the
+observed text matches a known term after a known OCR confusion, or it
+doesn't"), and structurally cannot repeat the false-HARAM failure mode.
+The real cost, measured against actual photo evidence rather than
+synthetic tests, is losing one observed correction pattern -- ingredients
+that don't match exactly now surface as unrecognized (syubhah, needs
+review) rather than being silently guessed at either way.
 
 Zero third-party dependencies (stdlib only), so it drops into src/
 alongside your existing files without touching requirements.txt.
@@ -30,18 +60,11 @@ Usage once wired into your project:
 from __future__ import annotations
 
 import argparse
-import difflib
 import os
 import re
 import subprocess
 import sys
 from typing import Iterable
-
-try:
-    from spellchecker import SpellChecker
-    _SPELL = SpellChecker()
-except ImportError:
-    _SPELL = None  # degrade gracefully -- see _is_real_word below
 
 # ---------------------------------------------------------------------------
 # Stage 1: structural cleanup
@@ -223,89 +246,18 @@ def _build_word_vocab(
     return words
 
 
-# E-numbers (E100-E1599, optionally with a trailing letter like E472e) are
-# too short and densely packed for fuzzy matching to be safe: several
-# valid codes can sit at the identical edit-distance from a garbled
-# token, so picking "the closest one" is really picking one at random
-# among several with very different halal implications.
-#
-# Checking the shape of the INPUT doesn't work -- OCR noise is exactly
-# what destroys that shape (a garbled "E471" can easily contain a letter
-# where a digit used to be, e.g. "E4T1"). What matters is the shape of
-# the proposed CORRECTION: if the best fuzzy match looks like an
-# E-number, refuse it unless it was an exact hit (checked separately,
-# above, and always trustworthy). An ambiguous E-number should surface
-# downstream as unrecognized and need review, not silently become the
-# wrong one.
-_CLEAN_ENUMBER_PATTERN = re.compile(r"^e\d{3,4}[a-z]?$")
-
-
-def _is_risky_enumber_guess(candidate_word: str) -> bool:
-    return bool(_CLEAN_ENUMBER_PATTERN.match(candidate_word))
-
-
-def _length_gap_too_large(a: str, b: str) -> bool:
-    """
-    Real OCR corruption (dropped/added/swapped characters) rarely changes
-    a word's length by more than one character -- every legitimate
-    correction found in testing has a length difference of 0 or 1
-    ("buttor"/"butter": 0, "bacn"/"bacon": 1, "watr"/"water": 1). A larger
-    gap is a signal that two genuinely different words just happen to
-    share a lot of characters, not that one is a garbled version of the
-    other -- this is exactly how "flavour" (a real, correctly-spelled
-    word, not in the vocabulary) got wrongly matched to the unrelated
-    vocabulary word "flour" (length difference of 2).
-    """
-    return abs(len(a) - len(b)) > 1
-
-
-# The default pyspellchecker dictionary is American-English only and
-# doesn't recognize common British spellings ("flavour", "colour") --
-# confirmed by testing, not assumed. That matters a lot here: British
-# spelling is the norm on labels from the UK and Commonwealth/JAKIM-region
-# markets this project targets, so relying on the dictionary alone would
-# silently fail on exactly the words most likely to appear. This is a
-# small, deliberately narrow supplement (food-label vocabulary only, not
-# a general British/American spelling converter).
-_BRITISH_SPELLING_EXTRAS = {
-    "flavour", "flavours", "flavoured", "flavouring", "flavourings",
-    "colour", "colours", "coloured", "colouring", "colourings",
-    "fibre", "fibres", "sulphite", "sulphites", "sulphate", "sulphates",
-    "aluminium", "mould", "moulds", "moulded",
-}
-
-
-def _is_real_word(word: str) -> bool:
-    """
-    True if `word` is a legitimate, correctly-spelled English word --
-    meaning it should never be treated as a candidate for correction, no
-    matter how close a fuzzy match to some unrelated vocabulary word looks.
-    This addresses the actual root cause of the "flavour" -> "flour" class
-    of bug: the word was never garbled in the first place. If the
-    spellchecker package isn't installed, this always returns False,
-    which just falls back to the previous (length-gap-guarded) behavior
-    rather than failing outright.
-    """
-    if _SPELL is None:
-        return False
-    return bool(_SPELL.known([word])) or word in _BRITISH_SPELLING_EXTRAS
-
-# A confusion-swap guess (e.g. "flav0ur" -> "flavour") that doesn't land
-# on an exact vocabulary word is a hypothesis, not confirmed text.
-# Fuzzy-matching that hypothesis against the vocabulary needs a much
-# higher bar than fuzzy-matching what was actually observed, or it can
-# drift onto an unrelated real word -- this constant is set with a
-# comfortable margin above a verified good case (guessed "sodum" ~
-# "sodium" scores 0.909) and below a verified bad one (guessed "flavour"
-# ~ the unrelated word "flour" scores 0.833).
-_GUESS_MATCH_CUTOFF = 0.87
-
-
-def _correct_token(token: str, word_vocab: set[str], cutoff: float) -> tuple[str, bool]:
+def _correct_token(token: str, word_vocab: set[str]) -> tuple[str, bool]:
     """
     Correct a single whitespace-separated token, preserving any leading or
     trailing punctuation (so "(Bovine)" corrects the word, not the parens)
     and roughly preserving the original capitalisation style.
+
+    EXACT MATCH ONLY: try the token as observed, and the token with a
+    small set of well-known OCR character confusions undone (0/o, 1/l,
+    8/b, etc. -- see _CONFUSIONS). If either lands PRECISELY on a real
+    vocabulary word, use it. If neither does, leave the token untouched --
+    no "closest guess" fallback. See the module docstring for why this
+    replaced an earlier fuzzy-matching version.
     """
     prefix, core, suffix = "", token, ""
     while core and core[0] in _PUNCT_STRIP:
@@ -313,64 +265,13 @@ def _correct_token(token: str, word_vocab: set[str], cutoff: float) -> tuple[str
     while core and core[-1] in _PUNCT_STRIP:
         suffix, core = core[-1] + suffix, core[:-1]
 
-    # Skip short tokens and pure numbers -- too easy to "correct" into
-    # something confidently wrong with too little to go on. The threshold
-    # is 4, not the original 3: real testing showed a correctly-spelled,
-    # unrelated 3-letter word like "for" can score a coincidental 0.75
-    # fuzzy match against an unrelated 5-letter vocabulary word ("flour"),
-    # silently damaging text that was never wrong. 4-letter words (e.g.
-    # "Watr" -> "Water") are still worth correcting and haven't shown this
-    # problem in testing so far.
-    if len(core) < 4 or core.lower() in word_vocab or core.isdigit():
+    if len(core) < 2 or core.lower() in word_vocab or core.isdigit():
         return token, False
 
-    candidates = _candidate_spellings(core)  # {raw lowered, confusion-swapped}
-    raw = core.lower()
-
-    # Exact hits are always trustworthy, whichever candidate produced them
-    # -- including landing exactly on an E-number, which is fine since
-    # there's no ambiguity to resolve.
-    for candidate in candidates:
+    for candidate in _candidate_spellings(core):  # {raw lowered, confusion-swapped}
         if candidate in word_vocab:
             return _apply_case(prefix, candidate, suffix, core), True
 
-    # No exact hit, and the word is already legitimate English -- this is
-    # the actual fix for the "flavour" -> "flour" class of bug: a word
-    # that was never garbled should never be a candidate for correction,
-    # regardless of how close a fuzzy match to some vocabulary word looks.
-    if _is_real_word(raw):
-        return token, False
-
-    # No exact hit, and it's not a recognizable word: fuzzy-match the RAW
-    # observed token at the normal cutoff (anchored to reality), and any
-    # confusion-swap GUESS only at the much stricter cutoff (anchored to a
-    # hypothesis). Keep whichever clears its bar with the higher ratio --
-    # but never accept a fuzzy match that lands on an E-number-shaped word
-    # (see _is_risky_enumber_guess) or one with an implausible length gap
-    # (see _length_gap_too_large) -- kept as defense in depth even with
-    # the real-word check in place, since that check only helps when the
-    # OBSERVED token happens to be a dictionary word itself.
-    best_ratio, best_match = 0.0, None
-
-    for match in difflib.get_close_matches(raw, word_vocab, n=1, cutoff=cutoff):
-        if _is_risky_enumber_guess(match) or _length_gap_too_large(raw, match):
-            continue
-        ratio = difflib.SequenceMatcher(None, raw, match).ratio()
-        if ratio > best_ratio:
-            best_ratio, best_match = ratio, match
-
-    for candidate in candidates:
-        if candidate == raw:
-            continue
-        for match in difflib.get_close_matches(candidate, word_vocab, n=1, cutoff=_GUESS_MATCH_CUTOFF):
-            if _is_risky_enumber_guess(match) or _length_gap_too_large(candidate, match):
-                continue
-            ratio = difflib.SequenceMatcher(None, candidate, match).ratio()
-            if ratio > best_ratio:
-                best_ratio, best_match = ratio, match
-
-    if best_match:
-        return _apply_case(prefix, best_match, suffix, core), True
     return token, False
 
 
@@ -382,9 +283,7 @@ def _apply_case(prefix: str, corrected_core: str, suffix: str, original_core: st
     return prefix + corrected_core + suffix
 
 
-def correct_segment_words(
-    segment: str, word_vocab: set[str], cutoff: float = 0.75
-) -> tuple[str, list[dict]]:
+def correct_segment_words(segment: str, word_vocab: set[str]) -> tuple[str, list[dict]]:
     """Run word-level correction across a whole segment, parens included."""
     if segment.strip().lower() in word_vocab:
         return segment, []  # already an exact known phrase, leave untouched
@@ -393,7 +292,7 @@ def correct_segment_words(
     out_tokens: list[str] = []
     corrections: list[dict] = []
     for tok in tokens:
-        new_tok, changed = _correct_token(tok, word_vocab, cutoff)
+        new_tok, changed = _correct_token(tok, word_vocab)
         if changed:
             corrections.append({"original": tok, "corrected": new_tok})
         out_tokens.append(new_tok)
@@ -466,7 +365,6 @@ def clean_ocr_text(
     raw_text: str,
     vocabulary: Iterable[str] | None = None,
     qualifier_vocabulary: Iterable[str] | None = None,
-    cutoff: float = 0.75,
 ) -> dict:
     """
     Turn raw OCR output into a cleaned, comma-separated ingredient
@@ -493,7 +391,7 @@ def clean_ocr_text(
         seg = _clean_segment_artifacts(raw_seg)
         if not seg:
             continue
-        new_seg, seg_corrections = correct_segment_words(seg, word_vocab, cutoff)
+        new_seg, seg_corrections = correct_segment_words(seg, word_vocab)
         corrections.extend(seg_corrections)
         cleaned_segments.append(new_seg)
 
@@ -513,9 +411,9 @@ _DEMO_SAMPLES = [
 ]
 
 
-def _run_demo(cutoff: float) -> None:
+def _run_demo() -> None:
     for sample in _DEMO_SAMPLES:
-        result = clean_ocr_text(sample, cutoff=cutoff)
+        result = clean_ocr_text(sample)
         print("Raw OCR text:")
         print(" ", repr(sample))
         print("Cleaned text:")
@@ -536,10 +434,6 @@ def _cli() -> None:
     parser.add_argument("--text", help="Raw OCR text to clean")
     parser.add_argument("--file", help="Path to a text file of raw OCR output")
     parser.add_argument(
-        "--cutoff", type=float, default=0.75,
-        help="Fuzzy-match similarity threshold, 0-1 (default 0.75)",
-    )
-    parser.add_argument(
         "--pipeline-cmd",
         help="Optional: path to your pipeline.py, to pipe the cleaned text "
              "straight into it, e.g. --pipeline-cmd src/pipeline.py",
@@ -551,7 +445,7 @@ def _cli() -> None:
     args = parser.parse_args()
 
     if args.demo:
-        _run_demo(args.cutoff)
+        _run_demo()
         return
 
     if args.file:
@@ -561,7 +455,7 @@ def _cli() -> None:
     else:
         raw = sys.stdin.read()
 
-    result = clean_ocr_text(raw, cutoff=args.cutoff)
+    result = clean_ocr_text(raw)
     print("Cleaned text:")
     print(" ", result["cleaned_text"])
     if result["corrections"]:

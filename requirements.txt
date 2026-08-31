@@ -1,6 +1,5 @@
 streamlit
 pytesseract
 pillow
-pyspellchecker
 torch
 transformers
