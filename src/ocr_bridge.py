@@ -76,7 +76,7 @@ from typing import Iterable
 # _cut_before_ingredients_marker below, not in this list -- see its
 # docstring for why.
 _BOILERPLATE_PATTERNS = [
-    r"(?i)\bnutrition(al)?\s+facts?\b.*$",     # trailing nutrition table junk
+    r"(?i)\bnutrition(al)?\s+(facts?|information)\b.*$",  # trailing nutrition table junk
     r"(?i)\bbest\s+before\b.*$",
     r"(?i)\bnet\s+wt\.?\b.*$",
     r"(?i)\ballerg(en|y)\s+advice\b.*$",
