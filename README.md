@@ -24,6 +24,18 @@ Here's the link for live demo:
 
 ---
 
+## Screenshots
+
+| Home | Result with reasoning |
+|---|---|
+| ![Home screen](images/ui-home.png) | ![Result screen showing per-ingredient verdicts](images/ui-result.png) |
+
+| Photo-quality rejection |
+|---|
+| ![Warning shown when label text is too small to read](images/ui-quality-rejection.png) |
+
+Each ingredient gets its own verdict and an expandable **Detail** with the reason. Blurry or too-small photos are rejected before OCR instead of producing a wrong answer.
+
 ## Table of contents
 
 - [What it does](#what-it-does)
