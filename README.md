@@ -285,6 +285,14 @@ and no model. No photo results are reported here because no photo set has
 been collected yet. When one is, labels that were printed or shown on screen
 will be reported separately from photos of real packaging.
 
+**Known weakness on photographed labels.** In informal checks on a handful of
+photos, curved or angled bottles with labels in several languages gave
+unreliable OCR: Tesseract sometimes returned lines out of order and with
+spelling errors, and the cleanup step, which discards text before the
+"Ingredients:" marker, then dropped part of the list. These checks were not a
+measurement (a few photos, ground truth not verified against the packs), so
+no figures are given.
+
 ## Tech stack
 
 | Layer | Tool |
