@@ -25,7 +25,7 @@ evaluation section below separates these three results.
 |---|---|
 | **Pipeline** | Photo-quality gate → Tesseract OCR → exact-match cleanup → rule engine + fine-tuned BERT NER → most-severe-verdict aggregation → Streamlit UI |
 | **NER model** | `bert-base-uncased` fine-tuned on FINER (181,970 sentences, 5 entity types). **ING entity F1 0.9669** on the held-out test set, vs 0.9536 for a BiLSTM-CRF baseline trained on identical splits |
-| **Classifier** | 165-row evidence-tiered reference table + 419-entry SANHA E-number table + keyword rules. Every verdict carries its evidence tier and source |
+| **Classifier** | 164-row evidence-tiered reference table + 419-entry SANHA E-number table + keyword rules. Every verdict carries its evidence tier and source |
 | **Real-label coverage** | On 60 real English product ingredient lists from Open Food Facts website, 556 of 853 ingredients (65.18%) were resolved with actual evidence; the rest were never guessed, they defaulted to "needs review". 417 of the 556 rest on the default permissibility principle for plant-based ingredients, 139 on a certifier ruling (see *What the 556 resolved ingredients rest on*) |
 | **Photos** | In a small pilot (8 photos of 7 products), 25% of the true ingredients were found exactly and 34% allowing small spelling errors. This is a pilot, not an accuracy estimate; see *Photo pilot* below |
 | **Design stance** | the method is conservative, meaning unknown or doubtful input never becomes "halal" or "haram" |
@@ -36,11 +36,11 @@ evaluation section below separates these three results.
 
 | Home | Result with reasoning |
 |---|---|
-| ![Home screen](images/ui-home.png) | ![Result screen showing per-ingredient verdicts](images/ui-result.png) |
+| ![Home screen](images/homepage.png) | ![Result screen showing per-ingredient verdicts](images/syubhah.png) |
 
 | Photo-quality rejection |
 |---|
-| ![Warning shown when label text is too small to read](images/ui-quality-rejection.png) |
+| ![Warning shown when label text is too small to read](images/too_small.png) |
 
 Each ingredient gets its own verdict and an expandable **Detail** with the reason. Blurry or too-small photos are rejected before OCR instead of producing a wrong answer.
 
@@ -53,6 +53,7 @@ Each ingredient gets its own verdict and an expandable **Detail** with the reaso
 - [Tech stack](#tech-stack)
 - [Engineering notes](#engineering-notes)
 - [Data and sources](#data-and-sources)
+- [Licence](#licence)
 - [Known limitations](#known-limitations)
 - [Project structure](#project-structure)
 - [Running it locally](#running-it-locally)
@@ -330,7 +331,8 @@ done. That is the main evidence gap in this project. What exists is a small
 pilot, run with [`tools/eval_photos.py`](tools/eval_photos.py), which scores
 the quality gate, OCR text error rate and ingredient recall
 per photo against hand-typed ground truth. It needs a folder of photos and a
-CSV of that ground truth (template: `results/photo_metadata_TEMPLATE.csv`),
+CSV of that ground truth (template: `results/photo_metadata_TEMPLATE.csv`;
+the pilot's own file is `results/photo_metadata.csv`),
 and no model.
 
 **What the pilot is.** 8 photos of 7 distinct packaged products from the
@@ -358,8 +360,11 @@ that appear, with the same normalised name, in the ingredients the pipeline
 read from the photo. The last column also counts a close spelling (difflib
 similarity of 0.85 or more) as a match. These rows were scored with
 `--ocr_rejected`, meaning OCR also ran on photos that the quality gate
-rejected. The script's output file also holds a character error rate for each
-photo; it is left out of this table because it is harder to interpret.
+rejected. The ground truth is in `results/photo_metadata.csv` and the
+script's output in `results/photo_eval_results.csv` (without the photos, which
+are third-party packaging, the scoring can be checked but not re-run). That
+output also holds a character error rate for each photo; it is left out of this
+table because it is harder to interpret.
 
 **Quality gate.** It passed 7 of the 8 photos on the author's Windows machine
 and rejected the cheese slices as too blurry (blur score 278 against a
@@ -448,7 +453,7 @@ made `e100` (curcumin, halal) match inside `e1000` (cholic acid, an animal
 bile acid SANHA files as doubtful), returning a confident false "halal".
 Matching now uses word boundaries. The same audit found and fixed corrupted
 CSV rows (unquoted commas splitting one field into three); see
-[`data/halalguard_source_provenance.md`](data/halalguard_source_provenance.md).
+[`docs/SOURCE_AUDIT.md`](docs/SOURCE_AUDIT.md).
 
 **Every verdict states its own evidence.** Each reference-table term
 declares the basis it rests on, and confidence is derived from the tier
@@ -466,7 +471,7 @@ rather than asserted:
 | Data | What it is | Where |
 |---|---|---|
 | FINER | Recipe ingredient-line NER corpus (scraped from Allrecipes), 181,970 sentences split 145,576 / 18,197 / 18,197; labels ING, PRODUCT, QUANTITY, STATE, UNIT. CC BY 4.0, by Komariah, Purnomo and Sin ([DOI](https://doi.org/10.6084/m9.figshare.20222361)); converted and re-split here | `data/finer.conll`, `data/{train,val,test}.jsonl` |
-| Ingredient reference table | 165 rows, each with `verdict`, `evidence_tier`, `source` and optional `notes` | `data/ingredient_reference.csv` |
+| Ingredient reference table | 164 rows, each with `verdict`, `evidence_tier`, `source` and optional `notes` | `data/ingredient_reference.csv` |
 | SANHA E-number table | 419 entries parsed from SANHA's published Halaal (354), Mashbooh (64) and Haraam (1) pages | `data/sanha_e_numbers_all.csv` |
 | Keyword basis | The basis recorded for each hardcoded keyword, with its verification status | `data/keyword_sources.csv` |
 | Open Food Facts sample | 60 real English product ingredient lists, for the domain-gap test | `data/off_sample.txt`, `data/off_results.json` |
@@ -474,11 +479,29 @@ rather than asserted:
 SANHA is the source of the E-number rulings. MUIS's Annex A risk tiers feed
 a separate `verification_risk` field that never changes the halal / haram /
 syubhah verdict. JAKIM's Malaysian Halal Management System 2020 (MHMS 2020) is cited
-   in 99 of the 165 reference-table rows, 12 of them as the certifier ruling
-   itself. JAKIM publishes no E-number list, so the E-number rulings
-   come from SANHA only. A fuller account, including which entries are still
-   awaiting an exact citation, is in
-[`data/halalguard_source_provenance.md`](data/halalguard_source_provenance.md).
+   in 98 of the 164 reference-table rows, 12 of them as the certifier ruling
+   itself. The author found no JAKIM E-number list (no dated source for
+   that search was recorded), so the E-number rulings come from SANHA only. A fuller account, including the sources behind each keyword, is in
+[`docs/SOURCE_AUDIT.md`](docs/SOURCE_AUDIT.md).
+
+## Licence
+
+The **code** is released under the [MIT licence](LICENSE). That licence does
+not cover the datasets or third-party content in this repository, which keep
+their own terms:
+
+- **FINER** (`data/finer.conll` and the train / val / test splits): CC BY 4.0.
+  Credit: Komariah, Purnomo and Sin, see the table above. The files here are
+  converted and re-split copies.
+- **Open Food Facts sample**: Open Database Licence (ODbL) 1.0, per the
+  author's project notes (to be verified against Open Food Facts' current
+  terms; see `docs/DATA.md`). ODbL carries attribution and share-alike
+  conditions.
+- **SANHA E-number table**: entries and descriptions were read from SANHA's
+  published pages. SANHA's terms for redistributing them have **not been
+  checked**, so reuse of that table should wait until they are.
+
+This is not legal advice.
 
 ## Known limitations
 
@@ -527,8 +550,9 @@ syubhah verdict. JAKIM's Malaysian Halal Management System 2020 (MHMS 2020) is c
 │                            splits, evaluation outputs, provenance notes
 ├── docs/
 │   ├── DATA.md              where each dataset comes from and its review status
-│   └── ENVIRONMENT.md       Python and dependency versions
-├── results/                 template CSV for the photo evaluation
+│   ├── ENVIRONMENT.md       Python and dependency versions
+│   └── SOURCE_AUDIT.md      historical source audit of the classifier
+├── results/                 photo-pilot ground truth and results, CSV template
 ├── tests/                   pytest tests (run in CI)
 ├── .github/workflows/       CI: runs the tests on every push
 ├── tools/
@@ -543,6 +567,8 @@ syubhah verdict. JAKIM's Malaysian Halal Management System 2020 (MHMS 2020) is c
 │   └── merge_descriptions.py           merge hand-collected descriptions
 ├── images/                  terminal captures of the two training runs
 ├── requirements.txt
+├── requirements-dev.txt     test and lint dependencies (CI)
+├── LICENSE                  MIT licence for the code
 ├── packages.txt             system-level dependency (Tesseract) for
 │                            Streamlit Cloud deployment
 └── README.md

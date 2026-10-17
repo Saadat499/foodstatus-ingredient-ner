@@ -15,7 +15,7 @@ reviewed the reference table; see [Review status](#review-status).
 
 | Dataset | File(s) | Size | Source | Review status |
 |---|---|---|---|---|
-| Ingredient reference table | `data/ingredient_reference.csv` | 165 rows | SANHA, JAKIM MHMS 2020, Qur'an, a jurisprudential default, author judgment | Compiled by the author; method confirmed by the academic supervisor; no fiqh review |
+| Ingredient reference table | `data/ingredient_reference.csv` | 164 rows | SANHA, JAKIM MHMS 2020, Qur'an, a jurisprudential default, author judgment | Compiled by the author; method confirmed by the academic supervisor; no fiqh review |
 | SANHA E-number table | `data/sanha_e_numbers_all.csv` | 419 entries | SANHA's published Halaal / Mashbooh / Haraam pages | Parsed from the pages; 22 entries have an empty `source_description` |
 | Keyword basis | `data/keyword_sources.csv` | 84 keywords | Mixed (see below) | 7 of 84 flagged for review; the rest have a recorded basis |
 | Open Food Facts sample | `data/off_sample.txt`, `data/off_sample_meta.jsonl`, `data/off_results.json` | 60 products | Open Food Facts | Used for evaluation only |
@@ -24,7 +24,9 @@ reviewed the reference table; see [Review status](#review-status).
 
 ## Ingredient reference table
 
-`data/ingredient_reference.csv` has 165 rows. Each row has a `verdict`, an
+`data/ingredient_reference.csv` has 164 rows (an earlier copy had 165; an exact duplicate
+"corn starch" row was removed on 2026-10-17, with no effect on any verdict).
+Each row has a `verdict`, an
 `evidence_tier`, a `source` and optional `notes`. The tiers keep different
 kinds of evidence apart:
 
@@ -32,7 +34,7 @@ kinds of evidence apart:
 |---|---|---|
 | `T1_CERTIFIER_RULING` | 41 | A ruling taken from a certifier. 29 rows cite SANHA; 12 rows (milk, butter, cream, yoghurt and similar dairy terms) cite JAKIM MHMS 2020 |
 | `T2_SCRIPTURAL` | 31 | A substance named directly in the Qur'an (pork, blood, carrion, intoxicants and similar) |
-| `T3_PRINCIPLE` | 87 | A plant-based or otherwise neutral ingredient classified as permissible by the default *al-asl fi al-ashya' al-ibahah* (grounded in Al-A'raf 7:157) |
+| `T3_PRINCIPLE` | 86 | A plant-based or otherwise neutral ingredient classified as permissible by the default *al-asl fi al-ashya' al-ibahah* (grounded in Al-A'raf 7:157) |
 | `T4_JUDGMENT` | 6 | A judgment call where no source and no general principle settled the case |
 
 ### What each tier does and does not claim
@@ -40,8 +42,8 @@ kinds of evidence apart:
 - **T1** is the only tier backed by a certifier for each individual term. It is
   not a review of the whole table by SANHA or JAKIM.
 - **T2** is scriptural, not inference: the text names the substance.
-- **T3** is the author's application of a general principle to 87 specific
-  ingredients. It is not 87 separately sourced rulings. Each T3 row also
+- **T3** is the author's application of a general principle to 86 specific
+  ingredients. It is not 86 separately sourced rulings. Each T3 row also
   carries a corroborating citation to JAKIM MHMS 2020, Lampiran J, which
   classifies plant and natural raw materials as not requiring a halal
   certificate. That corroborates the principle; it does not rule on each
@@ -51,8 +53,8 @@ kinds of evidence apart:
 
 ### JAKIM
 
-JAKIM MHMS 2020 (*Sistem Pengurusan Halal Malaysia*) is cited in 99 of the 165
-rows: all 87 T3 rows (as corroboration) and 12 T1 rows (as the direct source
+JAKIM MHMS 2020 (*Sistem Pengurusan Halal Malaysia*) is cited in 98 of the 164
+rows: all 86 T3 rows (as corroboration) and 12 T1 rows (as the direct source
 for the dairy verdicts). The 12 dairy rows are `syubhah` because MHMS 2020
 treats animal-source raw materials as requiring a halal certificate that the
 system cannot verify from a label.

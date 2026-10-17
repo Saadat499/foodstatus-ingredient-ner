@@ -23,7 +23,6 @@ import argparse
 import json
 import os
 
-import numpy as np
 import torch
 from seqeval.metrics import classification_report, f1_score, precision_score, recall_score
 from transformers import AutoTokenizer, AutoModelForTokenClassification

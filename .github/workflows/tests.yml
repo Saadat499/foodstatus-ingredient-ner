@@ -2,7 +2,15 @@ name: tests
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   pytest:
@@ -16,4 +24,6 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-dev.txt
       - run: pip install -r requirements-dev.txt
+      # Syntax errors and pyflakes findings only (unused imports, undefined names).
+      - run: ruff check --select E9,F .
       - run: python -m pytest -v

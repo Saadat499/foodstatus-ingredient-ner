@@ -110,7 +110,7 @@ def main():
     # ingredient has 12 words.
     long_ing = [i["ingredient"] for i in ingredients
                 if len(i["ingredient"].split()) >= 8]
-    print(f"\n--- possible segmentation failures ---")
+    print("\n--- possible segmentation failures ---")
     print(f"  {len(long_ing)} extracted 'ingredients' are 8+ words "
           f"({len(long_ing)/n_ing*100:.1f}%)")
     for x in long_ing[:5]:

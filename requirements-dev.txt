@@ -5,3 +5,4 @@
 pytest
 pillow==12.3.0
 pytesseract==0.3.13
+ruff==0.16.8
