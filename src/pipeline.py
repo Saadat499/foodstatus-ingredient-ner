@@ -133,6 +133,9 @@ def parse_args():
     src.add_argument("--file", help="File with one ingredient list per line.")
     p.add_argument("--table", default="data/sanha_e_numbers_all.csv")
     p.add_argument("--model_dir", default=os.environ.get("HALALGUARD_MODEL_DIR", "models/bert-ner"))
+    p.add_argument("--model_revision", default=os.environ.get("HALALGUARD_MODEL_REVISION"),
+                   help="Hugging Face commit hash to load when --model_dir is a Hub repo "
+                        "ID. Ignored for a local folder.")
     p.add_argument("--no-ner", action="store_true",
                    help="Skip stage 2 entirely; rules only.")
     p.add_argument("--unknown-policy", choices=UNKNOWN_POLICIES, default="syubhah")
@@ -141,18 +144,29 @@ def parse_args():
     return args
 
 
+def revision_for(model_dir: str, revision: str | None) -> str | None:
+    """The Hub revision to request, or None.
+
+    A local model folder has no revisions, so it is never given one. A Hub repo
+    ID gets the pinned commit hash (None means "latest", i.e. unpinned)."""
+    if os.path.isdir(model_dir):
+        return None
+    return revision or None
+
+
 class NERExtractor:
     """Wraps the fine-tuned model. Loaded lazily so the pipeline runs
     without torch/transformers installed when --no-ner is used."""
 
-    def __init__(self, model_dir: str):
+    def __init__(self, model_dir: str, revision: str | None = None):
         import torch
         from transformers import AutoTokenizer, AutoModelForTokenClassification
 
         self.torch = torch
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
-        self.model = AutoModelForTokenClassification.from_pretrained(model_dir)
+        rev = revision_for(model_dir, revision)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_dir, revision=rev)
+        self.model = AutoModelForTokenClassification.from_pretrained(model_dir, revision=rev)
         self.model.to(self.device).eval()
         self.id2label = self.model.config.id2label
 
@@ -271,7 +285,7 @@ def main():
     ner = None
     if not args.no_ner:
         try:
-            ner = NERExtractor(args.model_dir)
+            ner = NERExtractor(args.model_dir, args.model_revision)
             print(f"NER model loaded from {args.model_dir} "
                   f"(device: {ner.device})")
         except Exception as exc:
