@@ -19,3 +19,6 @@ Thumbs.db
 
 # Local scratch/test output -- not part of the actual app
 *_test_results.txt
+
+# Photos of branded packaging are third-party content; keep them local
+photos/
