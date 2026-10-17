@@ -277,6 +277,14 @@ An end-to-end accuracy evaluation on *photographed* labels with typed
 ground truth has not been done yet. That is the main evidence gap in this
 project.
 
+The tooling for it exists: [`tools/eval_photos.py`](tools/eval_photos.py)
+scores the quality gate, OCR cleanup character error rate and ingredient
+recall per photo and per source. It needs a folder of photos and a CSV of
+hand-typed ground truth (template: `results/photo_metadata_TEMPLATE.csv`),
+and no model. No photo results are reported here because no photo set has
+been collected yet. When one is, labels that were printed or shown on screen
+will be reported separately from photos of real packaging.
+
 ## Tech stack
 
 | Layer | Tool |
