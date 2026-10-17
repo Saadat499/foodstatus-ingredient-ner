@@ -17,7 +17,7 @@ reviewed the reference table; see [Review status](#review-status).
 |---|---|---|---|---|
 | Ingredient reference table | `data/ingredient_reference.csv` | 165 rows | SANHA, JAKIM MHMS 2020, Qur'an, a jurisprudential default, author judgment | Compiled by the author; method confirmed by the academic supervisor; no fiqh review |
 | SANHA E-number table | `data/sanha_e_numbers_all.csv` | 419 entries | SANHA's published Halaal / Mashbooh / Haraam pages | Parsed from the pages; 22 entries have an empty `source_description` |
-| Keyword basis | `data/keyword_sources.csv` | 84 keywords | Mixed (see below) | 36 of 84 not yet fully cited |
+| Keyword basis | `data/keyword_sources.csv` | 84 keywords | Mixed (see below) | 7 of 84 flagged for review; the rest have a recorded basis |
 | Open Food Facts sample | `data/off_sample.txt`, `data/off_sample_meta.jsonl`, `data/off_results.json` | 60 products | Open Food Facts | Used for evaluation only |
 | NER training data (FINER) | `data/train.jsonl`, `val.jsonl`, `test.jsonl`, `finer.conll` | 145,576 / 18,197 / 18,197 sentences | FINER dataset on Figshare | CC BY 4.0 (per the Figshare page) |
 | Real-photo pilot | none in the repository (photos are third-party packaging and kept local) | 8 photos of 7 products | Author's own kitchen | Small pilot, ground truth typed from the images and checked by the author against the packs; not a validated test set |
@@ -94,7 +94,8 @@ keywords and its verification status:
 
 | Verification status | Keywords |
 |---|---|
-| `NEEDS_EXACT_CITATION` | 29 |
+| `QURAN_VERSE_CATEGORY` | 25 |
+| `QURAN_VERSE_DIRECT` | 4 |
 | `GENERAL_CONSENSUS` | 17 |
 | `MUIS_ANNEX_A` | 12 |
 | `SANHA_HALAAL_LIST` | 10 |
@@ -102,8 +103,17 @@ keywords and its verification status:
 | `SANHA_HARAAM_LIST` | 4 |
 | SANHA single-page or FAQ sources (`SANHA_E904_PAGE` 2, `SANHA_GELATINE_FAQ` 1, `SANHA_E330_PAGE` 1, `SANHA_FAQ` 1) | 5 |
 
-36 of the 84 keywords (`NEEDS_EXACT_CITATION` plus `REVIEW_NEEDED`) still
-need an exact citation or a review. MUIS Annex A feeds a separate
+The 29 swine, blood, carrion and intoxicant keywords now cite the verse they
+rest on: Al-Baqarah 2:173 and Al-Ma'idah 5:3 (dead animals, blood, swine) and
+Al-Ma'idah 5:90 (intoxicants). The verse numbers were checked on 2026-10-17
+against the English text on Quran.is, which does not name its translator.
+`QURAN_VERSE_DIRECT` (pork, swine, pig, carrion) marks terms the verse names
+itself. `QURAN_VERSE_CATEGORY` marks products that fall under a category the
+verse names, such as bacon (swine) or vodka (an intoxicant); the verse does not
+name those products, so the link is an extension of the verse. The 7
+`REVIEW_NEEDED` keywords (chorizo, salami, pepperoni, bratwurst, wine, beer,
+mirin) still need a decision, because non-swine or non-alcoholic versions of
+them exist. MUIS Annex A feeds a separate
 `verification_risk` field and never changes the halal / haram / syubhah verdict.
 
 ## Open Food Facts sample

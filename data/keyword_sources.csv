@@ -1,45 +1,45 @@
 keyword,verdict,category,basis,verification_status
-pork,haram,swine,"Quranic prohibition of swine flesh (Al-Baqarah and Al-Ma'idah; confirm exact verse refs before citing)",NEEDS_EXACT_CITATION
-bacon,haram,swine,Swine-derived cut; follows the swine prohibition,NEEDS_EXACT_CITATION
-ham,haram,swine,Swine-derived cut; follows the swine prohibition,NEEDS_EXACT_CITATION
-swine,haram,swine,Direct term for the prohibited animal,NEEDS_EXACT_CITATION
+pork,haram,swine,The verse names the flesh of swine (Al-Baqarah 2:173 and Al-Ma'idah 5:3),QURAN_VERSE_DIRECT
+bacon,haram,swine,"Swine-derived cut; follows the swine prohibition; falls under swine, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
+ham,haram,swine,"Swine-derived cut; follows the swine prohibition; falls under swine, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
+swine,haram,swine,The verse names swine (Al-Baqarah 2:173 and Al-Ma'idah 5:3),QURAN_VERSE_DIRECT
 porcine,haram,swine,Technical term for swine-derived material; used by SANHA in gelatine guidance,SANHA_GELATINE_FAQ
-pig,haram,swine,Direct term for the prohibited animal,NEEDS_EXACT_CITATION
-piggy,haram,swine,Colloquial swine term seen on labels,NEEDS_EXACT_CITATION
-lard,haram,swine,Rendered swine fat,NEEDS_EXACT_CITATION
-gammon,haram,swine,Cured swine cut,NEEDS_EXACT_CITATION
-pancetta,haram,swine,Italian cured swine cut,NEEDS_EXACT_CITATION
-prosciutto,haram,swine,Italian cured swine cut,NEEDS_EXACT_CITATION
+pig,haram,swine,The verse names swine (Al-Baqarah 2:173 and Al-Ma'idah 5:3),QURAN_VERSE_DIRECT
+piggy,haram,swine,"Colloquial swine term seen on labels; falls under swine, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
+lard,haram,swine,"Rendered swine fat; falls under swine, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
+gammon,haram,swine,"Cured swine cut; falls under swine, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
+pancetta,haram,swine,"Italian cured swine cut; falls under swine, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
+prosciutto,haram,swine,"Italian cured swine cut; falls under swine, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
 chorizo,haram,swine,"Traditionally swine-based; NOTE beef/chicken chorizo exists -- possible false positive",REVIEW_NEEDED
 salami,haram,swine,"Traditionally swine-based; NOTE beef/turkey salami exists -- possible false positive",REVIEW_NEEDED
 pepperoni,haram,swine,"Traditionally swine/beef blend; NOTE halal beef pepperoni exists -- possible false positive",REVIEW_NEEDED
 bratwurst,haram,swine,Traditionally swine sausage,REVIEW_NEEDED
-speck,haram,swine,Cured swine cut,NEEDS_EXACT_CITATION
-guanciale,haram,swine,Cured swine jowl,NEEDS_EXACT_CITATION
-wine,haram,intoxicant,"Quranic prohibition of khamr (Al-Ma'idah; confirm exact verse refs). NOTE SANHA holds vinegar halal -- 'wine vinegar' may false-positive",REVIEW_NEEDED
+speck,haram,swine,"Cured swine cut; falls under swine, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
+guanciale,haram,swine,"Cured swine jowl; falls under swine, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
+wine,haram,intoxicant,"Quranic prohibition of khamr, intoxicants (Al-Ma'idah 5:90). NOTE SANHA holds vinegar halal -- 'wine vinegar' may false-positive",REVIEW_NEEDED
 beer,haram,intoxicant,Intoxicant; also appears as 'beer batter',REVIEW_NEEDED
-rum,haram,intoxicant,Distilled intoxicant,NEEDS_EXACT_CITATION
-whisky,haram,intoxicant,Distilled intoxicant,NEEDS_EXACT_CITATION
-whiskey,haram,intoxicant,Distilled intoxicant (alternate spelling),NEEDS_EXACT_CITATION
-vodka,haram,intoxicant,Distilled intoxicant,NEEDS_EXACT_CITATION
-brandy,haram,intoxicant,Distilled intoxicant,NEEDS_EXACT_CITATION
-liqueur,haram,intoxicant,Distilled intoxicant,NEEDS_EXACT_CITATION
-liquor,haram,intoxicant,Distilled intoxicant,NEEDS_EXACT_CITATION
-cognac,haram,intoxicant,Distilled intoxicant,NEEDS_EXACT_CITATION
-sherry,haram,intoxicant,Fortified wine,NEEDS_EXACT_CITATION
-champagne,haram,intoxicant,Sparkling wine,NEEDS_EXACT_CITATION
-ale,haram,intoxicant,Fermented intoxicant,NEEDS_EXACT_CITATION
-kirsch,haram,intoxicant,Cherry brandy; common in confectionery,NEEDS_EXACT_CITATION
-marsala,haram,intoxicant,Fortified wine; common in sauces,NEEDS_EXACT_CITATION
+rum,haram,intoxicant,"Distilled intoxicant; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+whisky,haram,intoxicant,"Distilled intoxicant; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+whiskey,haram,intoxicant,"Distilled intoxicant (alternate spelling); falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+vodka,haram,intoxicant,"Distilled intoxicant; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+brandy,haram,intoxicant,"Distilled intoxicant; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+liqueur,haram,intoxicant,"Distilled intoxicant; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+liquor,haram,intoxicant,"Distilled intoxicant; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+cognac,haram,intoxicant,"Distilled intoxicant; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+sherry,haram,intoxicant,"Fortified wine; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+champagne,haram,intoxicant,"Sparkling wine; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+ale,haram,intoxicant,"Fermented intoxicant; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+kirsch,haram,intoxicant,"Cherry brandy; common in confectionery; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
+marsala,haram,intoxicant,"Fortified wine; common in sauces; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
 mirin,haram,intoxicant,"Japanese rice wine; NOTE non-alcoholic 'mirin-style' seasoning exists",REVIEW_NEEDED
-sake,haram,intoxicant,Japanese rice wine,NEEDS_EXACT_CITATION
+sake,haram,intoxicant,"Japanese rice wine; falls under intoxicants, which the verse names (Al-Ma'idah 5:90); the verse does not name this product",QURAN_VERSE_CATEGORY
 e120,haram,insect,SANHA Haraam E-Numbers page: 'From insect Cochineal',SANHA_HARAAM_LIST
 cochineal,haram,insect,SANHA Haraam E-Numbers page (E120),SANHA_HARAAM_LIST
 carmine,haram,insect,SANHA Haraam E-Numbers page (E120 alternative name),SANHA_HARAAM_LIST
 carminic acid,haram,insect,SANHA Haraam E-Numbers page (E120 primary name),SANHA_HARAAM_LIST
-blood plasma,haram,blood,"Quranic prohibition of blood (Al-Ma'idah; confirm exact verse refs)",NEEDS_EXACT_CITATION
-blood meal,haram,blood,Blood-derived,NEEDS_EXACT_CITATION
-carrion,haram,carrion,"Quranic prohibition of maytah/carrion (Al-Ma'idah; confirm exact verse refs)",NEEDS_EXACT_CITATION
+blood plasma,haram,blood,"Blood-derived; falls under blood, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
+blood meal,haram,blood,"Blood-derived; falls under blood, which the verse names (Al-Baqarah 2:173 and Al-Ma'idah 5:3); the verse does not name this product",QURAN_VERSE_CATEGORY
+carrion,haram,carrion,"The verse names dead animals, maytah/carrion (Al-Baqarah 2:173 and Al-Ma'idah 5:3)",QURAN_VERSE_DIRECT
 water,halal,basic,Non-animal; universally permissible,GENERAL_CONSENSUS
 salt,halal,mineral,Mineral; MUIS Annex A lists 'Salt & sugar' as Low risk,MUIS_ANNEX_A
 sea salt,halal,mineral,Mineral,MUIS_ANNEX_A
