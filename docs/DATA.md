@@ -16,7 +16,7 @@ reviewed the reference table; see [Review status](#review-status).
 | Dataset | File(s) | Size | Source | Review status |
 |---|---|---|---|---|
 | Ingredient reference table | `data/ingredient_reference.csv` | 165 rows | SANHA, JAKIM MHMS 2020, Qur'an, a jurisprudential default, author judgment | Compiled by the author; method confirmed by the academic supervisor; no fiqh review |
-| SANHA E-number table | `data/sanha_e_numbers_all.csv` | 419 entries | SANHA's published Halaal / Mashbooh / Haraam pages | Parsed from the pages; 28 entries have an empty `source_description` |
+| SANHA E-number table | `data/sanha_e_numbers_all.csv` | 419 entries | SANHA's published Halaal / Mashbooh / Haraam pages | Parsed from the pages; 22 entries have an empty `source_description` |
 | Keyword basis | `data/keyword_sources.csv` | 84 keywords | Mixed (see below) | 36 of 84 not yet fully cited |
 | Open Food Facts sample | `data/off_sample.txt`, `data/off_sample_meta.jsonl`, `data/off_results.json` | 60 products | Open Food Facts | Used for evaluation only |
 | NER training data (FINER) | `data/train.jsonl`, `val.jsonl`, `test.jsonl`, `finer.conll` | 145,576 / 18,197 / 18,197 sentences | FINER dataset on Figshare | Licence not yet confirmed |
@@ -77,8 +77,14 @@ pages: 354 Halaal, 64 Mashbooh (mapped to `syubhah`) and 1 Haraam.
 
 - SANHA's website blocks automated fetching, so the pages were read in a
   browser. **[TODO: author to provide: date the pages were read]**
-- 28 entries have an empty `source_description`.
-  `data/missing_descriptions_TEMPLATE.csv` is the template for filling them.
+- 22 entries have an empty `source_description`. SANHA's list-page cards cut
+  off before the "Source:" field on these entries, and the text exists only on
+  each entry's own page. Six of the original 28 were filled from the individual
+  SANHA pages (E161(g), E336, E472(a), E472(b), E472(d), E472(e)), copied
+  verbatim. E1000 (Cholic Acid) was checked and its page has no "Source:" line,
+  so it stays blank. The other 21 empty entries are halal entries whose
+  verdict is already settled; `data/missing_descriptions_TEMPLATE.csv` lists
+  them and `tools/merge_descriptions.py` merges any that get filled.
 
 ## Keyword basis
 
