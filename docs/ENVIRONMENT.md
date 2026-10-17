@@ -25,8 +25,10 @@ test runs. Where a version could not be pinned, it says so.
   because of a known crash in the newer one. That replacement is done by the
   platform, not by this repository.
 - The NER model is not in this repository. The deployed app downloads it from
-  Hugging Face Hub using the `MODEL_DIR` setting. The model revision is **not
-  pinned yet**, so the app loads whatever the latest revision is.
-  **[TODO: author to provide: model commit hash to pin]**
+  Hugging Face Hub (`Saadat57/foodstatus-ingredient-ner`, set by the
+  `MODEL_DIR` setting). The revision is pinned to commit
+  `6182865bc94cc3ed4f53f2159d8c349a8337efae` (upload of 2026-08-30) in
+  `src/app.py`. A `MODEL_REVISION` secret overrides it. A local model folder is
+  never given a revision.
 - To run the tests locally from the repository root:
   `pip install -r requirements-dev.txt` then `python -m pytest`.

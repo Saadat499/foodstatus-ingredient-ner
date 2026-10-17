@@ -44,10 +44,17 @@ PIPELINE_SCRIPT = os.path.join("src", "pipeline.py")  # path AS SEEN from PROJEC
 # a separate subprocess -- that mechanism has a documented history of
 # inconsistency (see e.g. streamlit/streamlit#4123), and this makes the
 # actual value used fully explicit and controlled by this code instead.
+# Pinned Hugging Face commit of Saadat57/foodstatus-ingredient-ner (the upload
+# of 2026-08-30). Only used when MODEL_DIR is a Hub repo ID. Override with a
+# MODEL_REVISION secret to test a newer upload without a code change.
+PINNED_MODEL_REVISION = "6182865bc94cc3ed4f53f2159d8c349a8337efae"
+
 try:
     MODEL_DIR = st.secrets.get("MODEL_DIR", "models/bert-ner")
+    MODEL_REVISION = st.secrets.get("MODEL_REVISION", PINNED_MODEL_REVISION)
 except Exception:
     MODEL_DIR = "models/bert-ner"
+    MODEL_REVISION = PINNED_MODEL_REVISION
 
 # Only needed on Windows, where Tesseract isn't on PATH on this machine.
 # Harmless elsewhere -- pytesseract just uses PATH if this file doesn't exist.
@@ -122,7 +129,8 @@ def run_classifier(cleaned_text: str) -> dict:
     try:
         result = subprocess.run(
             [sys.executable, PIPELINE_SCRIPT, "--text", cleaned_text,
-             "--model_dir", MODEL_DIR, "--json", json_path],
+             "--model_dir", MODEL_DIR, "--model_revision", MODEL_REVISION,
+             "--json", json_path],
             cwd=PROJECT_ROOT,
             capture_output=True,
             text=True,
