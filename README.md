@@ -289,42 +289,46 @@ were not selected at random: they are the packaged items that were to hand
 and had a legible English list. The photos themselves are third-party
 packaging and are not included in the repository.
 
-| Product | CER (lower is better) | Exact ingredient recall | Near-match recall |
-|---|---|---|---|
-| Biscuit box | 0.28 | 40% | 50% |
-| Olive oil | 0.55 | 0% | 0% |
-| Grated parmesan | 0.01 | 100% | 100% |
-| Processed cheese slices | 0.48 | 12.5% | 12.5% |
-| Chili sauce, shot 1 | 0.13 | 11% | 33% |
-| Chili sauce, shot 2 | 0.54 | 22% | 56% |
-| Garlic sauce | 0.46 | 17% | 17% |
-| Orange juice | 0.43 | 0% | 0% |
-| **Mean over the 8 photos** | **0.36** | **25%** | **34%** |
+| Product | Ingredients found exactly | Found, allowing small spelling errors |
+|---|---|---|
+| Biscuit box | 40% | 50% |
+| Olive oil | 0% | 0% |
+| Grated parmesan | 100% | 100% |
+| Processed cheese slices | 12.5% | 12.5% |
+| Chili sauce, shot 1 | 0% | 33% |
+| Chili sauce, shot 2 | 33% | 56% |
+| Garlic sauce | 17% | 17% |
+| Orange juice | 0% | 0% |
+| **Mean over the 8 photos** | **25%** | **34%** |
 
-Exact recall counts a true ingredient as found only if its normalised name
-appears in the pipeline's parsed output; near-match accepts a close spelling
-(difflib ratio of 0.85 or more). CER is measured between the true list and
-the best-matching stretch of the OCR text, so it stays between 0 and 1. These
-rows were scored with `--ocr_rejected`, meaning OCR also ran on photos that the
-quality gate rejected.
+"Found exactly" is the share of the true ingredients (as typed from the pack)
+that appear, with the same normalised name, in the ingredients the pipeline
+read from the photo. The last column also counts a close spelling (difflib
+similarity of 0.85 or more) as a match. These rows were scored with
+`--ocr_rejected`, meaning OCR also ran on photos that the quality gate
+rejected. `results/photo_eval_results.csv` also holds a character error rate
+for each photo; it is left out of this table because it is harder to
+interpret.
 
-**Quality gate.** It passed 7 of the 8 photos when run on the author's
-Windows machine and 6 of 8 in the environment used to write this table.
-The difference is one photo close to a threshold; I have not identified which
-one or why. The gate rejected at least one photo that was readable (a text
-height just under the 15 px limit, and a photo with blur 278 against the
-threshold of 300), so its thresholds are likely too strict for some photos.
-That is an observation from this pilot and has not been tested further.
+**Quality gate.** It passed 7 of the 8 photos on the author's Windows machine
+and rejected the cheese slices as too blurry (blur score 278 against a
+threshold of 300). In the environment used to write this table, 6 of 8
+passed: the grated parmesan photo has text 15 px high on the author's machine,
+exactly at the 15 px limit, and just under it in the other environment. So
+the gate result for a photo near a threshold can differ between machines. The
+cheese slices were rejected and also scored poorly (12.5%), which fits the
+rejection; the parmesan photo scored 100%, so a borderline rejection there
+would have turned away a readable photo. Both are single examples, not a
+test of the thresholds.
 
 **How to read it.** With 8 photos and one or two shots per product, these
 numbers say what happened on this set. They are not an estimate of accuracy on
-real-world labels, and no confidence interval is meaningful at this size. The
-spread is the useful part: a flat list printed clearly (parmesan) was read
-almost perfectly, while curved or multilingual packaging gave low exact
-recall even when the CER looked moderate, because one misspelled word makes
-that ingredient a miss. Two shots of the same bottle gave a CER of 0.13 and
-0.54, so results can vary a lot between photos of the same product (the pilot
-did not test why).
+real-world labels. The spread is the useful part: a flat list printed clearly
+(parmesan) was read almost perfectly, while curved or multilingual
+packaging gave low recall, because one misspelled word makes that ingredient a
+miss. Two shots of the same chili sauce bottle found 0% and 33% of the
+ingredients exactly, so results can vary a lot between photos of the same
+product (the pilot did not test why).
 
 **Known weakness on photographed labels.** Curved or angled bottles with
 labels in several languages gave unreliable OCR: Tesseract sometimes
