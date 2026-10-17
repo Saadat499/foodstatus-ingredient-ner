@@ -52,9 +52,9 @@ MUIS distinguishes "Pure seafood" (Low) from "Processed seafood" (High), and
 "Synthetic vinegar" (Medium-Low) from "Pure vinegars" (High). The code preserves
 both distinctions rather than collapsing them.
 
-### JAKIM/JHEAINS → design principle only, no data
+### JAKIM/JHEAINS → design principle, plus MHMS 2020 citations in the reference table
 
-**No JAKIM data is in the code.** JHEAINS FAQ item #4 states (Malay):
+**Update:** this section was written before the reference table cited JAKIM MHMS 2020. The classifier code contains no JAKIM E-number data (JAKIM publishes none), but `data/ingredient_reference.csv` cites MHMS 2020 in 99 of 165 rows. See [`docs/DATA.md`](../docs/DATA.md). The JHEAINS FAQ below is still the basis for inspecting the source qualifier. JHEAINS FAQ item #4 states (Malay):
 
 > "Kod 'e' sebenarnya merujuk kepada aditif makanan... Bahan yang digunakan
 > merangkumi dari sumber haiwan, tumbuhan atau kimia. Tidak semestinya kod 'e'

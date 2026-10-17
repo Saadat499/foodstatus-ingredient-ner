@@ -65,7 +65,7 @@ ANIMAL_SOURCED_UNCONFIRMED_WORDS = {
 }
 
 # Definite triggers for ingredients written by NAME rather than E-number.
-# Prof. Husna: "some products don't have E numbers, they just list the
+# Academic supervisor: "some products don't have E numbers, they just list the
 # ingredients" -- so name-level matching is required, not optional.
 #
 # Basis for each term is recorded in data/keyword_sources.csv rather than
@@ -160,7 +160,7 @@ DEFINITE_HALAL_KEYWORDS = {
     "vinegar",
 }
 
-# The fourth status, approved by Prof. Husna with the condition that it
+# The fourth status, approved by the academic supervisor with the condition that it
 # carries a disclaimer explaining what it is and why.
 #
 # CRITICAL: this is NOT a fiqh ruling. Islamically there are three

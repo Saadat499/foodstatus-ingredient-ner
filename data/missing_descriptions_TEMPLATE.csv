@@ -1,11 +1,11 @@
 e_number,name,status,priority,source_description_FILL_ME
 E1000,Cholic Acid,syubhah,HIGH - tells user what to check,
-E161(g),Canthaxanthin,syubhah,HIGH - tells user what to check,
-E336,Cream of Tartar,syubhah,HIGH - tells user what to check,
-E472(a),Acetoglycerides,syubhah,HIGH - tells user what to check,
-E472(b),Lactoglycerides,syubhah,HIGH - tells user what to check,
-E472(d),Tartaric acid glycerol esters,syubhah,HIGH - tells user what to check,
-E472(e),Acetyltartaric acid glycerol esters,syubhah,HIGH - tells user what to check,
+E161(g),Canthaxanthin,syubhah,HIGH - tells user what to check,mushrooms; crustacea; fish; flamingo feathers.
+E336,Cream of Tartar,syubhah,HIGH - tells user what to check,by-product of wine industry; also synthetic chemical.
+E472(a),Acetoglycerides,syubhah,HIGH - tells user what to check,Fatty acid esters of glycerol & acetic acid. Check source of glycerol & fatty acids
+E472(b),Lactoglycerides,syubhah,HIGH - tells user what to check,Fatty acid esters of glycerol & lactic acid. Check source of glycerol & fatty acids.
+E472(d),Tartaric acid glycerol esters,syubhah,HIGH - tells user what to check,"Tartaric acid esters of mono- & di-glycerides of fatty acids. Check source of glycerol, tartaric acid, & fatty acid."
+E472(e),Acetyltartaric acid glycerol esters,syubhah,HIGH - tells user what to check,"esters of acetic acid, glycerol, tartaric acid, & fatty acids. Check source of glycerol, tartaric acid, & fatty acids."
 E102,Tartrazine,halal,low - verdict already settled,
 E103,Chrysoine Resorcinol,halal,low - verdict already settled,
 E104,Quinoline Yellow,halal,low - verdict already settled,
