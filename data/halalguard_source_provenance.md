@@ -142,8 +142,9 @@ the code.
 `E300/ascorbic acid`, `E407/carrageenan`, `E415/xanthan gum`. The pork and
 alcohol terms are uncontested in Islamic law but were not tied to one fetched
 document. `data/keyword_sources.csv` now records the basis and verification
-status of each keyword, and `docs/DATA.md` reports that 36 of 84 keywords still
-need an exact citation or review.
+status of each keyword. The pork, blood, carrion and intoxicant terms now cite
+the relevant Qur'an verses, and `docs/DATA.md` reports that 7 of 84 keywords
+still need review.
 
 **Two entries with possible residual editorial text.** The E471 and E570
 `source_description` fields end with "Note: [commercial variant] is stated as
