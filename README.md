@@ -276,7 +276,7 @@ identical.
 A full end-to-end accuracy evaluation on *photographed* labels has not been
 done. That is the main evidence gap in this project. What exists is a small
 pilot, run with [`tools/eval_photos.py`](tools/eval_photos.py), which scores
-the quality gate, OCR cleanup character error rate (CER) and ingredient recall
+the quality gate, OCR text error rate and ingredient recall
 per photo against hand-typed ground truth. It needs a folder of photos and a
 CSV of that ground truth (template: `results/photo_metadata_TEMPLATE.csv`),
 and no model.
