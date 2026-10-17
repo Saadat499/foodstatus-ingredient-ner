@@ -19,7 +19,7 @@ reviewed the reference table; see [Review status](#review-status).
 | SANHA E-number table | `data/sanha_e_numbers_all.csv` | 419 entries | SANHA's published Halaal / Mashbooh / Haraam pages | Parsed from the pages; 22 entries have an empty `source_description` |
 | Keyword basis | `data/keyword_sources.csv` | 84 keywords | Mixed (see below) | 36 of 84 not yet fully cited |
 | Open Food Facts sample | `data/off_sample.txt`, `data/off_sample_meta.jsonl`, `data/off_results.json` | 60 products | Open Food Facts | Used for evaluation only |
-| NER training data (FINER) | `data/train.jsonl`, `val.jsonl`, `test.jsonl`, `finer.conll` | 145,576 / 18,197 / 18,197 sentences | FINER dataset on Figshare | Licence not yet confirmed |
+| NER training data (FINER) | `data/train.jsonl`, `val.jsonl`, `test.jsonl`, `finer.conll` | 145,576 / 18,197 / 18,197 sentences | FINER dataset on Figshare | CC BY 4.0 (per the Figshare page) |
 | Real-photo set | none in the repository | n/a | n/a | Not yet collected or evaluated |
 
 ## Ingredient reference table
@@ -133,9 +133,16 @@ need an exact citation or a review. MUIS Annex A feeds a separate
 - Checked: the sentence count in this repository (145,576 + 18,197 + 18,197 =
   181,970) matches the figure the author recorded for the dataset
   (per project notes).
-- **Licence: not confirmed.** Check the licence on the Figshare page and record
-  it here before reuse or redistribution.
-  **[TODO: author to provide: FINER licence]**
+- Licence: **CC BY 4.0**, as shown on the Figshare record (checked by the
+  author on 17 October 2026, version 3, first posted 2022-09-07). CC BY
+  requires credit to the creators, a link to the licence, and a note of any
+  changes. Credit: Komariah, K. S., Purnomo, A. T. and Sin, B.-K., *FINER: Food
+  Ingredient NER Dataset*, Figshare, <https://doi.org/10.6084/m9.figshare.20222361>.
+  The files in `data/` (`finer.conll`, `train.jsonl`, `val.jsonl`,
+  `test.jsonl`) are a converted and re-split copy of that dataset, so this
+  credit applies to them. I believe CC BY allows redistribution on those terms,
+  but I am not a lawyer; check the licence text if the repository is reused
+  commercially.
 - Domain gap: the text is recipe-style ingredient listing (per project notes,
   drawn from Allrecipes.com recipe text), not terse packaged-product label
   text. This gap is why the real-label evaluation on Open Food Facts is
