@@ -1,5 +1,12 @@
 # HalalGuard-NLP — Source Provenance & Transparency Audit
 
+**Status of this document.** This is a record of a source audit of
+`classifier.py`, written when the SANHA table had 65 Mashbooh entries. The
+date of the audit was not recorded. This revision (2026-10-17) changes the
+wording and flags what is out of date; it does not redo the audit. For the
+current datasets, counts and review status, see [`docs/DATA.md`](../docs/DATA.md).
+Where this page and `docs/DATA.md` disagree, `docs/DATA.md` is current.
+
 Covers `classifier.py` only. The NER/BERT side uses the FINER dataset and involves
 no halal rulings.
 
@@ -24,7 +31,11 @@ all 65 by name, plus 9 edge cases). No fourth status can be produced.
 
 ### SANHA → the E-number lookup table AND the definite halal/haram terms
 
-`data/sanha_mashbooh_e_numbers_verified.csv`, 65 entries. Every entry carries
+At the time of the audit this was `data/sanha_mashbooh_e_numbers_verified.csv`,
+65 entries. The repository now holds `data/sanha_e_numbers_all.csv` with 419
+entries across SANHA's Halaal, Mashbooh and Haraam pages (see `docs/DATA.md`),
+so the statement below about a Mashbooh-only table describes the earlier
+version. In that version every entry carried
 `status = syubhah` because SANHA's Mashbooh list *is* the doubtful category by
 definition — it contains no halal or haram entries. The `source_description`
 field is SANHA's own wording, used verbatim in the classifier's output.
@@ -54,7 +65,13 @@ both distinctions rather than collapsing them.
 
 ### JAKIM/JHEAINS → design principle, plus MHMS 2020 citations in the reference table
 
-**Update:** this section was written before the reference table cited JAKIM MHMS 2020. The classifier code contains no JAKIM E-number data (JAKIM publishes none), but `data/ingredient_reference.csv` cites MHMS 2020 in 99 of 165 rows. See [`docs/DATA.md`](../docs/DATA.md). The JHEAINS FAQ below is still the basis for inspecting the source qualifier. JHEAINS FAQ item #4 states (Malay):
+This section was written before the reference table cited JAKIM MHMS 2020.
+The classifier code contains no JAKIM E-number data. The author's finding is
+that JAKIM publishes no E-number list; no dated source for that finding was
+recorded, so treat it as unconfirmed. `data/ingredient_reference.csv` cites
+MHMS 2020 in 99 of 165 rows (see [`docs/DATA.md`](../docs/DATA.md)). The
+JHEAINS FAQ below remains the basis for inspecting the source qualifier.
+JHEAINS FAQ item #4 states (Malay):
 
 > "Kod 'e' sebenarnya merujuk kepada aditif makanan... Bahan yang digunakan
 > merangkumi dari sumber haiwan, tumbuhan atau kimia. Tidak semestinya kod 'e'
@@ -108,48 +125,60 @@ microbial (non-animal) source is possible. All eight repaired.
 
 ---
 
-## 5. Flags you must be able to defend
+## 5. Known limitations and open points (as of the audit)
 
-**Tier 2 — my inference, not any source's words.** `RESOLVES_DOUBT_WORDS` vs
-`ANIMAL_SOURCED_UNCONFIRMED_WORDS` is the rule that "Bovine" leaves the doubt
-open (slaughter method unconfirmed) while "Plant-derived" closes it. This follows
-from SANHA's own descriptions and JAKIM's principle, but **no source states this
-mapping explicitly.** It is the single largest interpretive step in the code.
+The items below were open when the audit was written. Items marked
+**superseded** have since changed; the rest have not been re-checked.
 
-**Tier 3 — not individually verified against a fetched page.** These four sit in
-`DEFINITE_HALAL_KEYWORDS` without a confirmed SANHA page:
-`E100/curcumin`, `E300/ascorbic acid`, `E407/carrageenan`, `E415/xanthan gum`.
-Check `sanha.org.za` for each before publication. Also the pork/alcohol terms —
-uncontested in Islamic law, but not tied to one fetched document here.
+**Interpretive rule, not any source's words.** `RESOLVES_DOUBT_WORDS` vs
+`ANIMAL_SOURCED_UNCONFIRMED_WORDS` encodes the rule that "Bovine" leaves the
+doubt open (slaughter method unconfirmed) while "Plant-derived" closes it. This
+follows from SANHA's own descriptions and JAKIM's principle, but no source
+states this mapping explicitly. It is the single largest interpretive step in
+the code.
 
-**Two entries with possible residual editorial text.** E471 and E570
+**Terms not individually verified against a fetched page.** Four terms sat in
+`DEFINITE_HALAL_KEYWORDS` without a confirmed SANHA page: `E100/curcumin`,
+`E300/ascorbic acid`, `E407/carrageenan`, `E415/xanthan gum`. The pork and
+alcohol terms are uncontested in Islamic law but were not tied to one fetched
+document. `data/keyword_sources.csv` now records the basis and verification
+status of each keyword, and `docs/DATA.md` reports that 36 of 84 keywords still
+need an exact citation or review.
+
+**Two entries with possible residual editorial text.** The E471 and E570
 `source_description` fields end with "Note: [commercial variant] is stated as
-halaal". Plausibly SANHA's own wording (their list does note commercial
-variants), but I could not confirm. Verify both directly.
+halaal". This is plausibly SANHA's own wording, but it was not confirmed. Both
+should be checked against the SANHA pages.
 
-**E1000 has no source description.** Reads "No detailed source description given
-in source document" — honest, but it means the reason string is uninformative.
+**E1000 has no source description.** It reads "No detailed source description
+given in source document", which is honest but makes the reason string
+uninformative.
 
-**E120 is not unanimous.** SANHA says haram and the code follows that. Peer-
-reviewed literature (Halalsphere, IIUM) documents a Maliki position permitting
-it. Your code takes SANHA's position; the paper should acknowledge the dispute.
+**E120 is disputed.** SANHA says haram and the code follows that. Peer-reviewed
+literature (Halalsphere, IIUM) documents a Maliki position permitting it. The
+paper should acknowledge the dispute.
 
-**Coverage is 65 E-numbers plus ~25 keywords.** Most real ingredient names
-return syubhah with `confidence: none` — correct behaviour, but the practical
-consequence is that most inputs get a low-information answer.
+**Coverage was limited.** At the time there were 65 E-numbers plus about 25
+keywords, so most real ingredient names returned syubhah with
+`confidence: none`. That is correct behaviour, but most inputs got a
+low-information answer. **Superseded in part:** the reference table now has 165
+rows and the SANHA table 419 entries; the README reports coverage on real
+labels.
 
-**SANHA covers only the doubtful category.** There is no SANHA halal or haram
-list in the CSV, so the halal/haram verdicts rest on far thinner evidence than
-the syubhah ones.
+**SANHA covered only the doubtful category (superseded).** The 65-entry table
+contained no halal or haram entries. The current 419-entry table includes
+SANHA's Halaal and Haraam pages as well.
 
-**No accuracy measurement exists.** No labelled evaluation set, so no precision/
-recall/F1 can be reported for the classifier. The Kaggle datasets were correctly
-rejected as ground truth, which leaves this gap open.
+**No accuracy measurement existed (superseded in part).** There was no labelled
+evaluation set for the classifier. The README now reports a held-out test on
+83 SANHA entries (16 correct, 66 abstained, 1 wrong) and coverage on 60 real
+labels. There is still no gold annotation for real labels, so no accuracy
+figure for them.
 
-**MUIS risk tiers are not a halal ruling** and shouldn't be presented as one.
-An ingredient can be `halal` + `risk=high` — meaning permissible but
-documentation-heavy.
+**MUIS risk tiers are not a halal ruling.** An ingredient can be `halal` with
+`risk=high`, meaning permissible but documentation-heavy.
 
-**Provenance is not machine-readable.** The tier distinctions in this document
-live here, not in the code. Consider adding a `source` field per rule if a
-reviewer asks for per-rule attribution.
+**Provenance was not machine-readable.** The tier distinctions in this document
+lived here, not in the code. The reference table now carries an evidence tier
+and a source per row, and `data/keyword_sources.csv` records the basis of each
+keyword.
