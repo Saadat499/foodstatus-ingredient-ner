@@ -4,8 +4,8 @@ This page records where each dataset in the repository comes from, how far it
 has been checked, and what is still open. The counts below were computed from
 the files in `data/` on the commit this page was written against. Statements
 that come from the author's project notes and have not been re-verified
-against the primary source are marked **(per project notes)**. Items still to
-be filled in by the author are marked **[TODO: author to provide]**.
+against the primary source are marked **(per project notes)**. Facts the
+author could not supply are stated as "not recorded".
 
 **ScanHalal is a prototype. Its verdicts are a best effort and are not a halal
 certification.** No one with religious-scholarly (fiqh) qualification has
@@ -19,7 +19,7 @@ reviewed the reference table; see [Review status](#review-status).
 | SANHA E-number table | `data/sanha_e_numbers_all.csv` | 419 entries | SANHA's published Halaal / Mashbooh / Haraam pages | Parsed from the pages; 22 entries have an empty `source_description` |
 | Keyword basis | `data/keyword_sources.csv` | 84 keywords | Mixed (see below) | 36 of 84 not yet fully cited |
 | Open Food Facts sample | `data/off_sample.txt`, `data/off_sample_meta.jsonl`, `data/off_results.json` | 60 products | Open Food Facts | Used for evaluation only |
-| NER training data (FINER) | `data/train.jsonl`, `val.jsonl`, `test.jsonl`, `finer.conll` | 145,576 / 18,197 / 18,197 sentences | FINER dataset on Figshare | Licence not yet confirmed |
+| NER training data (FINER) | `data/train.jsonl`, `val.jsonl`, `test.jsonl`, `finer.conll` | 145,576 / 18,197 / 18,197 sentences | FINER dataset on Figshare | CC BY 4.0 (per the Figshare page) |
 | Real-photo set | none in the repository | n/a | n/a | Not yet collected or evaluated |
 
 ## Ingredient reference table
@@ -68,7 +68,7 @@ JAKIM publishes no E-number list, so all E-number rulings come from SANHA.
 - The T1 and T2 rows are meant to be individually sourced. The source text is
   present for all of them, but I have not re-checked each quoted source against
   the live SANHA pages or the MHMS 2020 document.
-  **[TODO: author to provide: date of last check against the live sources]**
+  The date of the last check against the live sources was not recorded.
 
 ## SANHA E-number table
 
@@ -76,7 +76,8 @@ JAKIM publishes no E-number list, so all E-number rulings come from SANHA.
 pages: 354 Halaal, 64 Mashbooh (mapped to `syubhah`) and 1 Haraam.
 
 - SANHA's website blocks automated fetching, so the pages were read in a
-  browser. **[TODO: author to provide: date the pages were read]**
+  browser, around 25 to 30 August 2026 (author's recollection; the exact
+  date was not recorded).
 - 22 entries have an empty `source_description`. SANHA's list-page cards cut
   off before the "Source:" field on these entries, and the text exists only on
   each entry's own page. Six of the original 28 were filled from the individual
@@ -109,8 +110,18 @@ need an exact citation or a review. MUIS Annex A feeds a separate
 
 - 60 English-language product ingredient lists, used for the out-of-domain
   test reported in the README.
-- Collected through the Open Food Facts public API (per project notes).
-  **[TODO: author to provide: collection date and the query or categories used]**
+- Collected through the Open Food Facts public API with
+  `tools/get_open_food_facts.py`, around 25 to 30 August 2026 (author's
+  recollection; the exact date was not recorded). The API returns live data, so
+  re-running the script today may return different products.
+- Query: products from the United States and United Kingdom, English-language
+  ingredient text only, up to 40 products per category page. The script walks
+  ten categories in order (breakfast-cereals, snacks, biscuits, breads, sauces,
+  canned-foods, chocolates, dairies, beverages, condiments) until it has 60
+  samples. The 60 samples in `data/off_sample_meta.jsonl` all came from the
+  first two: 37 snacks and 23 breakfast-cereals. The sample therefore covers
+  only those two product types, not the wider spread the script is designed to
+  collect.
 - Licence: Open Database License (ODbL) 1.0, which the author confirmed
   (per project notes). Verify at <https://world.openfoodfacts.org/terms-of-use>.
 - Used for evaluation only. It was not used for training.
@@ -122,9 +133,16 @@ need an exact citation or a review. MUIS Annex A feeds a separate
 - Checked: the sentence count in this repository (145,576 + 18,197 + 18,197 =
   181,970) matches the figure the author recorded for the dataset
   (per project notes).
-- **Licence: not confirmed.** Check the licence on the Figshare page and record
-  it here before reuse or redistribution.
-  **[TODO: author to provide: FINER licence]**
+- Licence: **CC BY 4.0**, as shown on the Figshare record (checked by the
+  author on 17 October 2026, version 3, first posted 2022-09-07). CC BY
+  requires credit to the creators, a link to the licence, and a note of any
+  changes. Credit: Komariah, K. S., Purnomo, A. T. and Sin, B.-K., *FINER: Food
+  Ingredient NER Dataset*, Figshare, <https://doi.org/10.6084/m9.figshare.20222361>.
+  The files in `data/` (`finer.conll`, `train.jsonl`, `val.jsonl`,
+  `test.jsonl`) are a converted and re-split copy of that dataset, so this
+  credit applies to them. I believe CC BY allows redistribution on those terms,
+  but I am not a lawyer; check the licence text if the repository is reused
+  commercially.
 - Domain gap: the text is recipe-style ingredient listing (per project notes,
   drawn from Allrecipes.com recipe text), not terse packaged-product label
   text. This gap is why the real-label evaluation on Open Food Facts is

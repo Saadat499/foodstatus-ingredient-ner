@@ -369,7 +369,7 @@ rather than asserted:
 
 | Data | What it is | Where |
 |---|---|---|
-| FINER | Recipe ingredient-line NER corpus (scraped from Allrecipes), 181,970 sentences split 145,576 / 18,197 / 18,197; labels ING, PRODUCT, QUANTITY, STATE, UNIT | `data/finer.conll`, `data/{train,val,test}.jsonl` |
+| FINER | Recipe ingredient-line NER corpus (scraped from Allrecipes), 181,970 sentences split 145,576 / 18,197 / 18,197; labels ING, PRODUCT, QUANTITY, STATE, UNIT. CC BY 4.0, by Komariah, Purnomo and Sin ([DOI](https://doi.org/10.6084/m9.figshare.20222361)); converted and re-split here | `data/finer.conll`, `data/{train,val,test}.jsonl` |
 | Ingredient reference table | 165 rows, each with `verdict`, `evidence_tier`, `source` and optional `notes` | `data/ingredient_reference.csv` |
 | SANHA E-number table | 419 entries parsed from SANHA's published Halaal (354), Mashbooh (64) and Haraam (1) pages | `data/sanha_e_numbers_all.csv` |
 | Keyword basis | The basis recorded for each hardcoded keyword, with its verification status | `data/keyword_sources.csv` |
