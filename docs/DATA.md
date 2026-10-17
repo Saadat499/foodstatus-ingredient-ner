@@ -76,7 +76,8 @@ JAKIM publishes no E-number list, so all E-number rulings come from SANHA.
 pages: 354 Halaal, 64 Mashbooh (mapped to `syubhah`) and 1 Haraam.
 
 - SANHA's website blocks automated fetching, so the pages were read in a
-  browser. **[TODO: author to provide: date the pages were read]**
+  browser, around 25 to 30 August 2026 (author's recollection; the exact
+  date was not recorded).
 - 22 entries have an empty `source_description`. SANHA's list-page cards cut
   off before the "Source:" field on these entries, and the text exists only on
   each entry's own page. Six of the original 28 were filled from the individual
@@ -109,8 +110,18 @@ need an exact citation or a review. MUIS Annex A feeds a separate
 
 - 60 English-language product ingredient lists, used for the out-of-domain
   test reported in the README.
-- Collected through the Open Food Facts public API (per project notes).
-  **[TODO: author to provide: collection date and the query or categories used]**
+- Collected through the Open Food Facts public API with
+  `tools/get_open_food_facts.py`, around 25 to 30 August 2026 (author's
+  recollection; the exact date was not recorded). The API returns live data, so
+  re-running the script today may return different products.
+- Query: products from the United States and United Kingdom, English-language
+  ingredient text only, up to 40 products per category page. The script walks
+  ten categories in order (breakfast-cereals, snacks, biscuits, breads, sauces,
+  canned-foods, chocolates, dairies, beverages, condiments) until it has 60
+  samples. The 60 samples in `data/off_sample_meta.jsonl` all came from the
+  first two: 37 snacks and 23 breakfast-cereals. The sample therefore covers
+  only those two product types, not the wider spread the script is designed to
+  collect.
 - Licence: Open Database License (ODbL) 1.0, which the author confirmed
   (per project notes). Verify at <https://world.openfoodfacts.org/terms-of-use>.
 - Used for evaluation only. It was not used for training.
