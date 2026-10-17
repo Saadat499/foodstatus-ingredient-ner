@@ -135,7 +135,7 @@ this under "Not yet measured".
 - **Compiled by:** the author, a student. This covers pulling SANHA's listings,
   identifying scripturally direct terms, and applying the permissibility
   principle to the remaining ingredients.
-- **Academic supervisor (Prof. Husna):** confirmed that applying the
+- **Academic supervisor:** confirmed that applying the
   permissibility principle to the T3 plant-based ingredients and the six T4
   judgment calls is methodologically reasonable. This is an academic sign-off
   on method. It is not a religious ruling and not a certifier review.
