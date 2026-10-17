@@ -20,12 +20,11 @@ Usage:
 """
 
 import argparse
-import json
 import os
 
 import numpy as np
 from datasets import load_dataset
-from seqeval.metrics import precision_score, recall_score, f1_score, classification_report
+from seqeval.metrics import precision_score, recall_score, f1_score
 from transformers import (
     AutoTokenizer,
     AutoModelForTokenClassification,

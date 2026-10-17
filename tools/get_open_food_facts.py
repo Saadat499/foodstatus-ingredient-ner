@@ -147,7 +147,7 @@ def main():
           f"ingredient lists.")
     print(f"Written to {args.out} (plain text, one per line)")
     print(f"Metadata written to {args.meta_out} (product name/code per line)")
-    print(f"\nNext step:")
+    print("\nNext step:")
     print(f"  python src/pipeline.py --file {args.out} --json data/off_results.json")
 
 

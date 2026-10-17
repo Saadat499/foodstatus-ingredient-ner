@@ -4,7 +4,7 @@
 `classifier.py`, written when the SANHA table had 65 Mashbooh entries. The
 date of the audit was not recorded. This revision (2026-10-17) changes the
 wording and flags what is out of date; it does not redo the audit. For the
-current datasets, counts and review status, see [`docs/DATA.md`](../docs/DATA.md).
+current datasets, counts and review status, see [`DATA.md`](DATA.md).
 Where this page and `docs/DATA.md` disagree, `docs/DATA.md` is current.
 
 Covers `classifier.py` only. The NER/BERT side uses the FINER dataset and involves
@@ -69,7 +69,7 @@ This section was written before the reference table cited JAKIM MHMS 2020.
 The classifier code contains no JAKIM E-number data. The author's finding is
 that JAKIM publishes no E-number list; no dated source for that finding was
 recorded, so treat it as unconfirmed. `data/ingredient_reference.csv` cites
-MHMS 2020 in 99 of 165 rows (see [`docs/DATA.md`](../docs/DATA.md)). The
+MHMS 2020 in 98 of 164 rows (see [`DATA.md`](DATA.md)). The
 JHEAINS FAQ below remains the basis for inspecting the source qualifier.
 JHEAINS FAQ item #4 states (Malay):
 
@@ -162,7 +162,7 @@ paper should acknowledge the dispute.
 **Coverage was limited.** At the time there were 65 E-numbers plus about 25
 keywords, so most real ingredient names returned syubhah with
 `confidence: none`. That is correct behaviour, but most inputs got a
-low-information answer. **Superseded in part:** the reference table now has 165
+low-information answer. **Superseded in part:** the reference table now has 164
 rows and the SANHA table 419 entries; the README reports coverage on real
 labels.
 
