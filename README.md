@@ -316,10 +316,11 @@ rather than asserted:
 
 SANHA is the source of the E-number rulings. MUIS's Annex A risk tiers feed
 a separate `verification_risk` field that never changes the halal / haram /
-syubhah verdict. JAKIM appears in the disclaimer as an example of a
-recognized certification body; no JAKIM data is used by the classifier
-(JAKIM publishes no E-number list). A fuller account, including which entries are still
-awaiting an exact citation, is in
+syubhah verdict. JAKIM's Malaysian Halal Management System 2020 (MHMS 2020) is cited
+   in 99 of the 165 reference-table rows, 12 of them as the certifier ruling
+   itself. JAKIM publishes no E-number list, so the E-number rulings
+   come from SANHA only. A fuller account, including which entries are still
+   awaiting an exact citation, is in
 [`data/halalguard_source_provenance.md`](data/halalguard_source_provenance.md).
 
 ## Known limitations
