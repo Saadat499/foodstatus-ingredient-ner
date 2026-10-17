@@ -2,10 +2,10 @@
 
 [![tests](https://github.com/Saadat499/foodstatus-ingredient-ner/actions/workflows/tests.yml/badge.svg)](https://github.com/Saadat499/foodstatus-ingredient-ner/actions/workflows/tests.yml)
 
-ScanHalal is a student project by Saadat. You point a camera at an ingredient
+Hey there! I am Saadat Ahmed this is my project named ScanHalal, i will guide you through the details. First you point a camera at an ingredient
 label, or upload a photo of one, and get a **halal / haram / syubhah** verdict
 for each ingredient, with the evidence and reasoning behind it instead of a
-black-box yes/no.
+plain yes/no.
 
 **Live demo:** https://foodstatus-ingredient-ner-jiqrb4emmsyjcvs6x95xvx.streamlit.app
 
