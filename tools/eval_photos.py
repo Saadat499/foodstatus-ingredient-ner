@@ -129,6 +129,15 @@ def ingredient_recall(predicted_text: str, truth_text: str):
 
 # -------------------------------------------------------------------- OCR
 
+def _configure_tesseract():
+    """Same Windows default-install fallback as src/app.py; harmless elsewhere.
+    The quality gate also calls Tesseract, so this runs before it."""
+    import pytesseract
+    win = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    if sys.platform.startswith("win") and os.path.exists(win):
+        pytesseract.pytesseract.tesseract_cmd = win
+
+
 def run_ocr(image):
     """Same orientation handling as src/app.py run_ocr (kept in sync by hand,
     because importing app.py would start the Streamlit UI)."""
@@ -164,6 +173,7 @@ def evaluate_photo(row, photos_dir, ocr_rejected):
         out.update(status="missing_file")
         return out
     image = Image.open(path).convert("RGB")
+    _configure_tesseract()
     q = assess_photo_quality(image)
     gate_pass = not (q["is_too_blurry"] or q["is_text_too_small"])
     out.update(
