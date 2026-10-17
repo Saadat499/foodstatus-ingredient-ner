@@ -202,6 +202,11 @@ full pipeline (`tools/get_open_food_facts.py`, `tools/analyse_off_results.py`):
 | Fell back to a default (`syubhah`, confidence `none`) | 297 |
 | Resolved by rules / by NER / NER found no span | 496 / 350 / 7 |
 
+At the product level, 58 of the 60 labels came out `syubhah` (needs
+review), 2 came out `halal`, and none came out `haram`. This follows from the
+aggregation rule (the most severe ingredient verdict wins): one ingredient
+the system cannot resolve is enough to make the whole product `syubhah`.
+
 There is no gold annotation for these labels, so this measures
 **coverage**, not accuracy. The most frequent unrecognized items were
 generic terms such as *emulsifier* (13), *flavourings* (7), *raising
@@ -225,6 +230,46 @@ from keywords, the reference file and qualifier logic alone:
 
 The one wrong answer is listed, with its reasoning string, in
 [`classifier_holdout_results.csv`](data/classifier_holdout_results.csv).
+
+### Reading the results
+
+- **The 0.9669 ING F1 is on recipe text.** It shows the model learned the
+  FINER task well. It does not say how well the system reads product labels.
+  The real-label test is the check on that.
+- **65.18% is coverage, not accuracy.** It counts how many extracted
+  ingredients were resolved with evidence instead of falling back to
+  `syubhah`. Nothing in this repository checks whether those 556 verdicts are
+  correct for the real labels, because there is no gold annotation for them.
+- **The product-level result is conservative to the point of limited use on
+  real products.** With 297 of 853 ingredients unresolved, 58 of 60 products
+  could not be cleared. The system's value today is what it refuses to claim,
+  not how many products it clears.
+- **The held-out test is small and one-sided.** It ran on 83 entries and the
+  classifier decided only 17 of them (16 correct, 1 wrong). It shows the
+  classifier abstains instead of guessing. It does not show how accurate it is
+  across the whole table.
+- **No claim here covers photographs.** Every number above starts from typed
+  or API-sourced text, so none of them include the photo-quality check or
+  OCR errors (see below).
+
+### Raw outputs
+
+Every number in this section comes from one of these files. The last column
+says what is needed to regenerate it. Run commands from the repository root.
+
+| File | What it holds | Regenerate with | Needs |
+|---|---|---|---|
+| [`data/per_entity_results.csv`](data/per_entity_results.csv) | BERT per-entity precision, recall, F1 | `python tools/evaluate_ner.py` | torch, transformers, seqeval and the trained model in `models/bert-ner` |
+| [`data/bilstm_crf_per_entity.csv`](data/bilstm_crf_per_entity.csv) | BiLSTM-CRF per-entity scores | `src/train_bilstm_crf.py` (retrains) | torch, a GPU is recommended; **committed result, not re-run as part of this check** |
+| [`data/training_curve.csv`](data/training_curve.csv) | BERT validation curve | `python tools/training_curve.py` | the original training checkpoints (`trainer_state.json`), which are not in this repository |
+| [`data/off_sample.txt`](data/off_sample.txt), [`off_sample_meta.jsonl`](data/off_sample_meta.jsonl) | The 60 Open Food Facts ingredient lists | `python tools/get_open_food_facts.py` | network access; the live API may return different products today |
+| [`data/off_results.json`](data/off_results.json) | Full pipeline output for those 60 labels | `python src/pipeline.py --file data/off_sample.txt --json data/off_results.json` | torch, transformers and the model. **Without them the run is rules-only and overwrites this file with different numbers** |
+| [`data/off_coverage_summary.csv`](data/off_coverage_summary.csv), [`off_unrecognised.csv`](data/off_unrecognised.csv) | Coverage figures and the unrecognised-ingredient ranking | `python tools/analyse_off_results.py` | the standard library only |
+| [`data/classifier_holdout_results.csv`](data/classifier_holdout_results.csv) | The 83 held-out SANHA entries and the outcome for each | `python tools/evaluate_classifier_holdout.py` | the standard library only |
+
+Re-running a script can rewrite a file with different line endings, which
+shows up as a whole-file change in `git diff` even when the numbers are
+identical.
 
 ### Not yet measured
 
