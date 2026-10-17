@@ -1,0 +1,6 @@
+# Dependencies for running the test suite (CI and local).
+# torch/transformers/streamlit and the Tesseract binary are deliberately NOT
+# needed: the tests never load the NER model or call Tesseract.
+pytest
+pillow
+pytesseract
