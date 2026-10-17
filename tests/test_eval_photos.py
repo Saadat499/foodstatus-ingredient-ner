@@ -20,6 +20,21 @@ def test_cer_counts_character_errors():
     assert ep.cer("suqar", "sugar") == 0.2
 
 
+def test_cer_ignores_text_around_the_list():
+    # the true list appears verbatim inside longer OCR text (e.g. nutrition table)
+    ocr = "calories 75 total fat 4g water sugar salt serving size 15g"
+    assert ep.cer(ocr, "Water, Sugar, Salt") == 0
+    assert ep.cer_full_text(ocr, "Water, Sugar, Salt") > 1
+
+
+def test_cer_is_bounded_by_one():
+    assert ep.cer("zzzz", "water sugar") <= 1
+
+
+def test_cer_counts_errors_inside_the_matched_stretch():
+    assert ep.cer("xx suqar xx", "sugar") == 0.2
+
+
 def test_cer_empty_truth_is_none():
     assert ep.cer("anything", "") is None
 
