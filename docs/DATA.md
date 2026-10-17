@@ -20,7 +20,7 @@ reviewed the reference table; see [Review status](#review-status).
 | Keyword basis | `data/keyword_sources.csv` | 84 keywords | Mixed (see below) | 36 of 84 not yet fully cited |
 | Open Food Facts sample | `data/off_sample.txt`, `data/off_sample_meta.jsonl`, `data/off_results.json` | 60 products | Open Food Facts | Used for evaluation only |
 | NER training data (FINER) | `data/train.jsonl`, `val.jsonl`, `test.jsonl`, `finer.conll` | 145,576 / 18,197 / 18,197 sentences | FINER dataset on Figshare | CC BY 4.0 (per the Figshare page) |
-| Real-photo set | none in the repository | n/a | n/a | Not yet collected or evaluated |
+| Real-photo pilot | none in the repository (photos are third-party packaging and kept local) | 8 photos of 7 products | Author's own kitchen | Small pilot, ground truth typed from the images and checked by the author against the packs; not a validated test set |
 
 ## Ingredient reference table
 
@@ -148,11 +148,18 @@ need an exact citation or a review. MUIS Annex A feeds a separate
   text. This gap is why the real-label evaluation on Open Food Facts is
   reported separately.
 
-## Real-photo set
+## Real-photo pilot
 
-No photo evaluation set is in the repository yet. The photo-quality gate and
-the end-to-end photo behaviour are therefore not measured. The README lists
-this under "Not yet measured".
+The only end-to-end photo evaluation is a small pilot: 8 photos of 7 packaged
+products photographed by the author, English text only. The ground-truth
+ingredient lists were typed from the images and then checked by the author
+against the physical packs. The photos were not randomly chosen. They are not
+in the repository, because they show third-party packaging, and neither is
+the ground-truth CSV. The results are reported in the README under
+"Photo pilot", with the scoring script in `tools/eval_photos.py`.
+
+The pilot is too small to give an accuracy figure. A photo set large enough to
+do so has not been collected.
 
 ## Review status
 

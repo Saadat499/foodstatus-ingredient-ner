@@ -1,26 +1,34 @@
 # ScanHalal
 
-Hi everyone! I am Saadat here : - )  and it's my project named ScanHalal, so basically what it does is you point a camera at an ingredient label, or upload a photo of one, and get an
-instant **halal / haram / syubhah** verdict with the actual reasoning
-behind every decision and not a black-box yes/no.
+[![tests](https://github.com/Saadat499/foodstatus-ingredient-ner/actions/workflows/tests.yml/badge.svg)](https://github.com/Saadat499/foodstatus-ingredient-ner/actions/workflows/tests.yml)
 
-Here's the link for live demo:
+ScanHalal is a student project by Saadat. You point a camera at an ingredient
+label, or upload a photo of one, and get a **halal / haram / syubhah** verdict
+for each ingredient, with the evidence and reasoning behind it instead of a
+black-box yes/no.
+
 **Live demo:** https://foodstatus-ingredient-ner-jiqrb4emmsyjcvs6x95xvx.streamlit.app
+
+**Summary of the evidence:** the NER model scores well on its recipe-text test
+set, but on real packaged-product labels most products still end up as
+"syubhah" (needs review), and photo reading is the weakest stage. The
+evaluation section below separates these three results.
 
 > **Disclaimer:** This is a personal/academic portfolio project, not an
 > official halal certification tool. It should not be relied on as a
 > substitute for recognized certification bodies (e.g. JAKIM) for any
 > real dietary or religious decision.
 
-## What my project does at a glance
+## What the project does at a glance
 
 | | |
 |---|---|
 | **Pipeline** | Photo-quality gate → Tesseract OCR → exact-match cleanup → rule engine + fine-tuned BERT NER → most-severe-verdict aggregation → Streamlit UI |
 | **NER model** | `bert-base-uncased` fine-tuned on FINER (181,970 sentences, 5 entity types). **ING entity F1 0.9669** on the held-out test set, vs 0.9536 for a BiLSTM-CRF baseline trained on identical splits |
 | **Classifier** | 165-row evidence-tiered reference table + 419-entry SANHA E-number table + keyword rules. Every verdict carries its evidence tier and source |
-| **Real-label coverage** | On 60 real English product ingredient lists from Open Food Facts webstie, 556 of 853 ingredients (65.18%) were resolved with actual evidence; the rest were never guessed, they defaulted to "needs review" |
-| **Design stance** | my method was conservative, meaning unknown or doubtful input never becomes "halal" or "haram" |
+| **Real-label coverage** | On 60 real English product ingredient lists from Open Food Facts website, 556 of 853 ingredients (65.18%) were resolved with actual evidence; the rest were never guessed, they defaulted to "needs review". 417 of the 556 rest on the default permissibility principle for plant-based ingredients, 139 on a certifier ruling (see *What the 556 resolved ingredients rest on*) |
+| **Photos** | In a small pilot (8 photos of 7 products), 25% of the true ingredients were found exactly and 34% allowing small spelling errors. This is a pilot, not an accuracy estimate; see *Photo pilot* below |
+| **Design stance** | the method is conservative, meaning unknown or doubtful input never becomes "halal" or "haram" |
 
 ---
 
@@ -55,7 +63,7 @@ Each ingredient gets its own verdict and an expandable **Detail** with the reaso
 
 ## What it does
 
-1. A user such as me or you can scan or upload a photo of an ingredient label
+1. A user scans or uploads a photo of an ingredient label
 2. A photo-quality check rejects blurry photos, or ones where the text is
    too small to read reliably, *before* wasting time on OCR
 3. OCR reads the raw text off the photo and automatically checks multiple
@@ -252,6 +260,48 @@ The one wrong answer is listed, with its reasoning string, in
   or API-sourced text, so none of them include the photo-quality check or
   OCR errors. A small photo pilot is reported separately below.
 
+### What the 556 resolved ingredients rest on
+
+"Resolved" means the pipeline matched a rule and attached a source. It does not
+mean the verdict has been checked by a scholar. The 556 split by evidence tier
+like this:
+
+| Evidence tier | Ingredients | Verdict | Confidence |
+|---|---|---|---|
+| T3, permissibility principle (plant-based or otherwise neutral ingredients, permissible by default) | 417 (75%) | all halal | medium |
+| T1, certifier ruling (SANHA or JAKIM MHMS 2020) | 139 (25%) | 76 halal, 63 syubhah | high |
+| T2, named directly in the Qur'an | 0 | n/a | n/a |
+| T4, author judgment | 0 | n/a | n/a |
+
+So three quarters of the "resolved" figure comes from a default principle
+applied to ingredients such as oats and sugar, not from a certifier. That
+principle was confirmed as a reasonable method by the academic supervisor (see
+`docs/DATA.md`), but no one with fiqh qualification has reviewed it. No T2 or
+T4 rows matched any ingredient in this sample.
+
+### Does the NER model change the result?
+
+The same 60 labels were run with the rules alone (`--no-ner`) and with the
+rules plus the fine-tuned BERT NER:
+
+| | Rules only | Rules + NER |
+|---|---|---|
+| Ingredient items extracted | 622 | 853 |
+| Resolved with evidence | 436 | 556 |
+| Fell back to a default | 186 | 297 |
+| Share resolved | 70.1% | 65.2% |
+| Products ending as syubhah / halal | 57 / 3 | 58 / 2 |
+
+The percentages are not like for like, because the two runs extract different
+numbers of items. With NER the pipeline extracts 231 more items, resolves 120
+of them and leaves 111 unresolved, so the share resolved drops while the number
+resolved rises. At product level the NER made no practical difference: 57 and
+58 of 60 products are syubhah either way. There is no gold annotation for these
+labels, so this comparison cannot say whether the extra extracted items are
+correct splits or noise. The rules-only run was produced with the current code
+for this table; the rules + NER figures are the committed results used
+throughout this section and were not re-run for it.
+
 ### Raw outputs
 
 Every number in this section comes from one of these files. The last column
@@ -264,6 +314,8 @@ says what is needed to regenerate it. Run commands from the repository root.
 | [`data/training_curve.csv`](data/training_curve.csv) | BERT validation curve | `python tools/training_curve.py` | the original training checkpoints (`trainer_state.json`), which are not in this repository |
 | [`data/off_sample.txt`](data/off_sample.txt), [`off_sample_meta.jsonl`](data/off_sample_meta.jsonl) | The 60 Open Food Facts ingredient lists | `python tools/get_open_food_facts.py` | network access; the live API may return different products today |
 | [`data/off_results.json`](data/off_results.json) | Full pipeline output for those 60 labels | `python src/pipeline.py --file data/off_sample.txt --json data/off_results.json` | torch, transformers and the model. **Without them the run is rules-only and overwrites this file with different numbers** |
+| [`data/off_results_rules_only.json`](data/off_results_rules_only.json) | The same 60 labels run without NER | `python src/pipeline.py --file data/off_sample.txt --no-ner --json data/off_results_rules_only.json` | the standard library only (no model) |
+| [`data/off_evidence_tiers.csv`](data/off_evidence_tiers.csv) | The 556 resolved ingredients by evidence tier | `python tools/summarise_evidence_tiers.py` | the standard library only |
 | [`data/off_coverage_summary.csv`](data/off_coverage_summary.csv), [`off_unrecognised.csv`](data/off_unrecognised.csv) | Coverage figures and the unrecognised-ingredient ranking | `python tools/analyse_off_results.py` | the standard library only |
 | [`data/classifier_holdout_results.csv`](data/classifier_holdout_results.csv) | The 83 held-out SANHA entries and the outcome for each | `python tools/evaluate_classifier_holdout.py` | the standard library only |
 
@@ -306,9 +358,8 @@ that appear, with the same normalised name, in the ingredients the pipeline
 read from the photo. The last column also counts a close spelling (difflib
 similarity of 0.85 or more) as a match. These rows were scored with
 `--ocr_rejected`, meaning OCR also ran on photos that the quality gate
-rejected. `results/photo_eval_results.csv` also holds a character error rate
-for each photo; it is left out of this table because it is harder to
-interpret.
+rejected. The script's output file also holds a character error rate for each
+photo; it is left out of this table because it is harder to interpret.
 
 **Quality gate.** It passed 7 of the 8 photos on the author's Windows machine
 and rejected the cheese slices as too blurry (blur score 278 against a
@@ -474,12 +525,20 @@ syubhah verdict. JAKIM's Malaysian Halal Management System 2020 (MHMS 2020) is c
 │   └── train_bilstm_crf.py  baseline model training script
 ├── data/                    reference tables, SANHA E-number list, NER
 │                            splits, evaluation outputs, provenance notes
+├── docs/
+│   ├── DATA.md              where each dataset comes from and its review status
+│   └── ENVIRONMENT.md       Python and dependency versions
+├── results/                 template CSV for the photo evaluation
+├── tests/                   pytest tests (run in CI)
+├── .github/workflows/       CI: runs the tests on every push
 ├── tools/
 │   ├── evaluate_ner.py                 per-entity NER evaluation
 │   ├── evaluate_classifier_holdout.py  classifier hold-out test
 │   ├── get_open_food_facts.py          real-label sample download
 │   ├── analyse_off_results.py          coverage / unrecognized analysis
 │   ├── training_curve.py               extract training curve
+│   ├── eval_photos.py                  score photos against typed ground truth
+│   ├── summarise_evidence_tiers.py     resolved ingredients by evidence tier
 │   ├── parse_sanha.py                  SANHA page dumps -> CSV
 │   └── merge_descriptions.py           merge hand-collected descriptions
 ├── images/                  terminal captures of the two training runs
@@ -495,7 +554,9 @@ syubhah verdict. JAKIM's Malaysian Halal Management System 2020 (MHMS 2020) is c
 pip install -r requirements.txt
 ```
 
-The code uses `X | None` type syntax, so it needs Python 3.10 or newer.
+The code uses `X | None` type syntax, so it needs Python 3.10 or newer. It is
+only tested on Python 3.14 (CI and Streamlit Cloud); other versions are
+untested.
 Tesseract OCR also needs to be installed separately — it's a system
 program, not a Python package:
 - Windows: https://github.com/UB-Mannheim/tesseract/wiki
