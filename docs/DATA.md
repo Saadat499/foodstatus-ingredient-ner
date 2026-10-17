@@ -68,7 +68,7 @@ JAKIM publishes no E-number list, so all E-number rulings come from SANHA.
 - The T1 and T2 rows are meant to be individually sourced. The source text is
   present for all of them, but I have not re-checked each quoted source against
   the live SANHA pages or the MHMS 2020 document.
-  **[TODO: author to provide: date of last check against the live sources]**
+  The date of the last check against the live sources was not recorded.
 
 ## SANHA E-number table
 
