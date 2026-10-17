@@ -22,9 +22,15 @@ INPUT
 
 WHAT IT MEASURES (per photo, then per source)
     gate_pass          did the blur / text-height check accept the photo
-    cer                character error rate of the cleaned OCR text against
-                       the true text (lower is better; 0 = identical).
+    cer                character error rate of the true text against the BEST-
+                       MATCHING STRETCH of the cleaned OCR text (lower is
+                       better; 0 = the true list appears verbatim, 1 = nothing
+                       matches). Text around the list, such as a nutrition
+                       table or another language, is not counted as error.
                        Letters and digits only, case-insensitive.
+    cer_full_text      the older, stricter version: the whole OCR text against
+                       the true list, so extra text counts as error and the
+                       value can exceed 1. Kept for transparency.
     recall_exact       share of true ingredients that appear, after
                        normalisation, as an exact entry in the cleaned text
     recall_near        same, but allowing a close spelling (similarity >= 0.85)
@@ -79,8 +85,33 @@ def edit_distance(a: str, b: str) -> int:
     return prev[-1]
 
 
+def best_substring_distance(predicted: str, truth: str) -> int:
+    """Smallest edit distance between `truth` and ANY contiguous stretch of
+    `predicted` (approximate substring matching). Text before and after the
+    best stretch is free."""
+    m, n = len(truth), len(predicted)
+    prev = [0] * (n + 1)          # matching may start anywhere in predicted
+    for i in range(1, m + 1):
+        cur = [i] + [0] * n
+        ti = truth[i - 1]
+        for j in range(1, n + 1):
+            cur[j] = min(prev[j] + 1, cur[j - 1] + 1,
+                         prev[j - 1] + (ti != predicted[j - 1]))
+        prev = cur
+    return min(prev)              # ... and end anywhere
+
+
 def cer(predicted: str, truth: str):
-    """Character error rate against the truth; None if the truth is empty."""
+    """Character error rate of the true list against the best-matching stretch
+    of the OCR text; between 0 and 1. None if the truth is empty."""
+    t = normalise(truth)
+    if not t:
+        return None
+    return best_substring_distance(normalise(predicted), t) / len(t)
+
+
+def cer_full_text(predicted: str, truth: str):
+    """Strict version: whole OCR text against the true list (can exceed 1)."""
     t = normalise(truth)
     if not t:
         return None
@@ -189,9 +220,11 @@ def evaluate_photo(row, photos_dir, ocr_rejected):
     cleaned = clean_ocr_text(run_ocr(image))["cleaned_text"]
     truth = row.get("true_ingredient_text", "")
     c = cer(cleaned, truth)
+    c_full = cer_full_text(cleaned, truth)
     r_exact, r_near = ingredient_recall(cleaned, truth)
     out.update(
         cer=None if c is None else round(c, 4),
+        cer_full_text=None if c_full is None else round(c_full, 4),
         recall_exact=None if r_exact is None else round(r_exact, 4),
         recall_near=None if r_near is None else round(r_near, 4),
         cleaned_text=cleaned,
@@ -260,7 +293,7 @@ def main():
     write_csv(os.path.join(args.out_dir, "photo_eval_results.csv"), rows,
               ["photo_file", "source", "product_or_barcode", "lighting", "angle",
                "status", "gate_pass", "reject_reason", "blur_score",
-               "text_height_px", "cer", "recall_exact", "recall_near",
+               "text_height_px", "cer", "cer_full_text", "recall_exact", "recall_near",
                "cleaned_text"])
     write_csv(os.path.join(args.out_dir, "photo_eval_summary.csv"), summary,
               ["source", "photos", "gate_pass", "gate_pass_rate", "photos_scored",
