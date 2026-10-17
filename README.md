@@ -248,9 +248,9 @@ The one wrong answer is listed, with its reasoning string, in
   classifier decided only 17 of them (16 correct, 1 wrong). It shows the
   classifier abstains instead of guessing. It does not show how accurate it is
   across the whole table.
-- **No claim here covers photographs.** Every number above starts from typed
+- **No claim above covers photographs.** Every number above starts from typed
   or API-sourced text, so none of them include the photo-quality check or
-  OCR errors (see below).
+  OCR errors. A small photo pilot is reported separately below.
 
 ### Raw outputs
 
@@ -271,27 +271,68 @@ Re-running a script can rewrite a file with different line endings, which
 shows up as a whole-file change in `git diff` even when the numbers are
 identical.
 
-### Not yet measured
+### Photo pilot (small, not an accuracy measurement)
 
-An end-to-end accuracy evaluation on *photographed* labels with typed
-ground truth has not been done yet. That is the main evidence gap in this
-project.
+A full end-to-end accuracy evaluation on *photographed* labels has not been
+done. That is the main evidence gap in this project. What exists is a small
+pilot, run with [`tools/eval_photos.py`](tools/eval_photos.py), which scores
+the quality gate, OCR cleanup character error rate (CER) and ingredient recall
+per photo against hand-typed ground truth. It needs a folder of photos and a
+CSV of that ground truth (template: `results/photo_metadata_TEMPLATE.csv`),
+and no model.
 
-The tooling for it exists: [`tools/eval_photos.py`](tools/eval_photos.py)
-scores the quality gate, OCR cleanup character error rate and ingredient
-recall per photo and per source. It needs a folder of photos and a CSV of
-hand-typed ground truth (template: `results/photo_metadata_TEMPLATE.csv`),
-and no model. No photo results are reported here because no photo set has
-been collected yet. When one is, labels that were printed or shown on screen
-will be reported separately from photos of real packaging.
+**What the pilot is.** 8 photos of 7 distinct packaged products from the
+author's own kitchen, one or two shots each (the chili sauce was photographed
+twice). All 8 ground-truth ingredient lists were typed from the images, English
+text only, and checked against the physical packs by the author. The photos
+were not selected at random: they are the packaged items that were to hand
+and had a legible English list. The photos themselves are third-party
+packaging and are not included in the repository.
 
-**Known weakness on photographed labels.** In informal checks on a handful of
-photos, curved or angled bottles with labels in several languages gave
-unreliable OCR: Tesseract sometimes returned lines out of order and with
-spelling errors, and the cleanup step, which discards text before the
-"Ingredients:" marker, then dropped part of the list. These checks were not a
-measurement (a few photos, ground truth not verified against the packs), so
-no figures are given.
+| Product | CER (lower is better) | Exact ingredient recall | Near-match recall |
+|---|---|---|---|
+| Biscuit box | 0.28 | 40% | 50% |
+| Olive oil | 0.55 | 0% | 0% |
+| Grated parmesan | 0.01 | 100% | 100% |
+| Processed cheese slices | 0.48 | 12.5% | 12.5% |
+| Chili sauce, shot 1 | 0.13 | 11% | 33% |
+| Chili sauce, shot 2 | 0.54 | 22% | 56% |
+| Garlic sauce | 0.46 | 17% | 17% |
+| Orange juice | 0.43 | 0% | 0% |
+| **Mean over the 8 photos** | **0.36** | **25%** | **34%** |
+
+Exact recall counts a true ingredient as found only if its normalised name
+appears in the pipeline's parsed output; near-match accepts a close spelling
+(difflib ratio of 0.85 or more). CER is measured between the true list and
+the best-matching stretch of the OCR text, so it stays between 0 and 1. These
+rows were scored with `--ocr_rejected`, meaning OCR also ran on photos that the
+quality gate rejected.
+
+**Quality gate.** It passed 7 of the 8 photos when run on the author's
+Windows machine and 6 of 8 in the environment used to write this table.
+The difference is one photo close to a threshold; I have not identified which
+one or why. The gate rejected at least one photo that was readable (a text
+height just under the 15 px limit, and a photo with blur 278 against the
+threshold of 300), so its thresholds are likely too strict for some photos.
+That is an observation from this pilot and has not been tested further.
+
+**How to read it.** With 8 photos and one or two shots per product, these
+numbers say what happened on this set. They are not an estimate of accuracy on
+real-world labels, and no confidence interval is meaningful at this size. The
+spread is the useful part: a flat list printed clearly (parmesan) was read
+almost perfectly, while curved or multilingual packaging gave low exact
+recall even when the CER looked moderate, because one misspelled word makes
+that ingredient a miss. Two shots of the same bottle gave a CER of 0.13 and
+0.54, so results can vary a lot between photos of the same product (the pilot
+did not test why).
+
+**Known weakness on photographed labels.** Curved or angled bottles with
+labels in several languages gave unreliable OCR: Tesseract sometimes
+returned lines out of order and with spelling errors, and the cleanup step,
+which discards text before the "Ingredients:" marker, then dropped part of
+the list. This was seen in the informal checks that preceded the pilot and is
+consistent with its low-recall rows, but the pilot did not isolate the cause
+photo by photo.
 
 ## Tech stack
 
@@ -407,8 +448,8 @@ syubhah verdict. JAKIM's Malaysian Halal Management System 2020 (MHMS 2020) is c
   manufacturer text (e.g. "PREPARED BY …") can be read as an ingredient
   and show as unrecognized, which raises the product verdict to
   "syubhah" rather than "halal"
-- No end-to-end accuracy figure on photographed labels yet (see
-  *Results*)
+- No end-to-end accuracy figure on photographed labels; only a small pilot
+  (8 photos, see *Results*)
 - The photo-quality thresholds were calibrated on a small number of real
   photos and are starting points, not validated numbers
 
