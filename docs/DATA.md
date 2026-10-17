@@ -4,8 +4,8 @@ This page records where each dataset in the repository comes from, how far it
 has been checked, and what is still open. The counts below were computed from
 the files in `data/` on the commit this page was written against. Statements
 that come from the author's project notes and have not been re-verified
-against the primary source are marked **(per project notes)**. Items still to
-be filled in by the author are marked **[TODO: author to provide]**.
+against the primary source are marked **(per project notes)**. Facts the
+author could not supply are stated as "not recorded".
 
 **ScanHalal is a prototype. Its verdicts are a best effort and are not a halal
 certification.** No one with religious-scholarly (fiqh) qualification has
